@@ -1,0 +1,119 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<SCRIPT
+echo "Update system"
+sudo yum -y update
+
+echo "Installing Docker... actually Podman"
+sudo yum -y install podman-docker
+sudo touch /etc/containers/nodocker
+docker --version
+podman --version
+
+echo "Installing some packages"
+sudo yum -y install unzip curl tree vim
+
+NOMAD_VERSION="0.10.4"
+cd /tmp/
+curl https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip
+
+sudo unzip nomad.zip -d /usr/local/bin
+
+nomad -autocomplete-install
+complete -C /usr/local/bin/nomad nomad
+
+nomad version
+
+sudo mkdir --parents /opt/nomad
+sudo mkdir -p /etc/nomad.d
+sudo chmod a+w /etc/nomad.d
+
+cat <<-EOF | sudo tee /etc/systemd/system/nomad.service
+[Unit]
+Description=Nomad
+Documentation=https://nomadproject.io/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/local/bin/nomad agent -config /etc/nomad.d
+KillMode=process
+KillSignal=SIGINT
+LimitNOFILE=infinity
+LimitNPROC=infinity
+Restart=on-failure
+RestartSec=2
+StartLimitBurst=3
+StartLimitIntervalSec=10
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat <<-EOF | sudo tee /etc/nomad.d/common.hcl
+datacenter = "dc1"
+data_dir = "/opt/nomad"
+EOF
+
+cat <<-EOF | sudo tee /etc/nomad.d/server.hcl
+server {
+  enabled = true
+  bootstrap_expect = 1
+}
+EOF
+
+cat <<-EOF | sudo tee /etc/nomad.d/client.hcl
+client {
+  enabled = true
+}
+EOF
+
+echo "Install firewalld service and open Nomad ports..."
+cat <<-EOF | sudo tee /usr/lib/firewalld/services/nomad-server.xml
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>Hashicorp Nomad Server</short>
+  <port protocol="udp" port="4648"/>
+  <port protocol="tcp" port="4648"/>
+  <port protocol="tcp" port="4647"/>
+  <port protocol="tcp" port="4646"/>
+</service>
+EOF
+
+cat <<-EOF | sudo tee /usr/lib/firewalld/services/nomad-client.xml 
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>Hashicorp Nomad Client</short>
+  <port protocol="tcp" port="4646"/>
+</service>
+EOF
+
+sudo firewall-cmd --reload
+sudo firewall-cmd --zone=public --permanent --add-service=nomad-server
+sudo firewall-cmd --zone=public --permanent --add-service=nomad-client
+sudo firewall-cmd --zone=public --permanent --list-services
+sudo systemctl restart firewalld
+
+sudo systemctl enable nomad
+sudo systemctl start nomad
+sudo systemctl status nomad
+SCRIPT
+
+Vagrant.configure(2) do |config|
+  config.ssh.insert_key = false
+
+  config.vm.box = "generic/centos8"
+  config.vm.hostname = "nomad"
+  config.vm.provision "shell", inline: $script, privileged: false
+
+  # Expose the nomad api and ui to the host
+  config.vm.network "forwarded_port", guest: 4646, host: 4646, auto_correct: true, host_ip: "127.0.0.1"
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.connect_via_ssh = true
+    libvirt.username = "mkaesz"
+    libvirt.host = "arch.msk.local"
+  end
+end
