@@ -1,0 +1,20 @@
+HOSTS = 3
+
+Vagrant.configure("2") do |config|
+  
+  config.ssh.insert_key = false
+
+  (1..HOSTS).each do |i|
+    config.vm.define "server#{i}" do |s|
+      s.vm.box = "Centos8withNomad"
+      s.vm.hostname = "server#{i}"
+      s.vm.provider :libvirt do |libvirt|
+        libvirt.connect_via_ssh = true
+        libvirt.username = "mkaesz"
+        libvirt.host = "192.168.0.171"
+      end
+      s.vm.synced_folder "/home/mkaesz/workspace", "/vagrant_data"
+      s.vm.network "forwarded_port", guest: 4646, host: 46461, auto_correct: true, host_ip: "127.0.0.1"                                                                      
+    end
+  end
+end
