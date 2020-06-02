@@ -1,0 +1,13 @@
+{
+  "server": true,
+  "ui": true,
+  "log_level": "INFO",
+  "data_dir": "/tmp/consul/server1",
+  "node_name": "server1",
+  "bind_addr": "{{ GetInterfaceIP \"ens4\" }}",
+  "client_addr": "{{ GetInterfaceIP \"ens4\" }}",
+  "bootstrap_expect": 1,
+  "connect": {
+    "enabled": true
+  }
+}

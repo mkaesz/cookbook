@@ -1,0 +1,15 @@
+{
+  "ui": true,
+  "log_level": "INFO",
+  "data_dir": "/tmp/consul/client1",
+  "node_name": "client1",
+  "bind_addr": "{{ GetInterfaceIP \"ens4\" }}",
+  "client_addr": "{{ GetInterfaceIP \"ens4\" }}",
+  "retry_join": [
+    "nomad-server-1"
+  ],
+  "connect": {
+    "enabled": true
+  }
+}
+
