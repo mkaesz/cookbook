@@ -15,3 +15,7 @@ consul {
   address = "nomad-server-1:8500"
 }
 
+# Enable ACLs
+acl {
+  enabled = true
+}
