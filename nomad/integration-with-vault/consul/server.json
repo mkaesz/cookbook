@@ -1,0 +1,14 @@
+{
+    "datacenter": "instruqt",
+    "log_level": "INFO",
+    "data_dir": "/root/hashistack/consul/server",
+    "server": true,
+    "ui": true,
+    "bind_addr": "{{ GetInterfaceIP \"ens4\" }}",
+    "client_addr": "0.0.0.0",
+    "bootstrap_expect": 1,
+    "recursors": [
+      "10.64.0.254"
+    ]
+}
+
