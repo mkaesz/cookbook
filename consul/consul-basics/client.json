@@ -1,0 +1,16 @@
+{
+  "datacenter": "dc1",
+  "server": false,
+  "bind_addr": "0.0.0.0",
+  "client_addr": "0.0.0.0",
+  "data_dir": "/consul/data",
+  "log_level": "INFO",
+  "node_name": "App",
+  "ui": true,
+  "retry_join": [
+    "consul-server-0:8301",
+    "consul-server-1:8301",
+    "consul-server-2:8301"
+  ]
+}
+

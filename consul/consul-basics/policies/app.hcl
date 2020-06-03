@@ -1,0 +1,3 @@
+node "App" {
+  policy = "write"
+}
