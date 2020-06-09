@@ -1,0 +1,5 @@
+*/*.box
+.vagrant
+.terraform
+terraform.state
+terraform.state.backup
