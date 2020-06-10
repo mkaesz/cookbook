@@ -21,7 +21,7 @@
       "http_port_min": "10082",
       "output_directory": "output",
       "shutdown_timeout": "30m",
-      "vm_name": "disk.raw",
+      "vm_name": "fedora32-kvm-cloudinit.raw",
       "qemu_binary": "qemu-system-x86_64",
       "qemuargs": [
         ["-m", "1024"],
@@ -33,5 +33,11 @@
     }
   ],
   "post-processors": [
+     {
+        "inline": [
+          "mv output/fedora32-kvm-cloudinit.raw /home/mkaesz/workspace/images"
+        ],
+        "type": "shell-local"
+      }
   ]
 }
