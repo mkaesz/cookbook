@@ -10,7 +10,7 @@ resource "libvirt_pool" "fedora" {
 
 resource "libvirt_volume" "os_image" {
   name   = "os_image"
-  source = "http://192.168.0.171:8088/workspace/fedora32-kvm-cloudinit.raw"
+  source = "http://192.168.0.171:8088/workspace/images/fedora32-kvm-cloudinit.raw"
 }
 
 resource "libvirt_volume" "volume" {
