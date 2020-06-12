@@ -5,6 +5,7 @@ HostIP=$(ip route get 1.1.1.1 | awk 'NR==1 { print $7 }')
 ## Start the etcd backend
 ### NOTE: Added 0.0.0.0 to advertised client urls to allow direct container communication
 podman pull quay.io/coreos/etcd:v${ETCD_VERSION}
+podman stop etcd && podman rm etcd
 podman run -d \
   -v /usr/share/ca-certificates/:/etc/ssl/certs \
   -p 4001:4001 -p 2380:2380 -p 2379:2379 \
@@ -23,8 +24,8 @@ etcd_ip=$(podman inspect etcd | jq -r '.[].NetworkSettings.IPAddress')
 
 ## Start CoreDNS
 ### Drop Corefile
-sudo mkdir -p /etc/coredns
-cat << 'EOF' > /etc/coredns/Corefile
+# sudo mkdir -p /etc/coredns
+cat << 'EOF' > Corefile
 . {
     etcd msk.local {
         stubzones
@@ -40,22 +41,23 @@ EOF
 
 ### Pull and run container with above config
 podman pull docker.io/coredns/coredns:${COREDNS_VERSION}
+podman stop coredns && podman rm coredns
 podman run -d \
   --name coredns \
-  -v /etc/coredns:/data:ro \
+  -v ${PWD}:/data:ro \
   --env ETCD_IP=${HostIP} \
-  --publish 1053:53/udp \
   docker.io/coredns/coredns:${COREDNS_VERSION} -conf /data/Corefile
 
+coredns_ip=$(podman inspect coredns | jq -r '.[].NetworkSettings.IPAddress')
 ## Create some test data
 ### Add Forward entries
 podman exec -ti --env=ETCDCTL_API=3  etcd /usr/local/bin/etcdctl \
-  put /skydns/local/msk/ "{\"host\":\"${HostIP}\",\"ttl\":60}"
+  put /skydns/local/msk/arch "{\"host\":\"${HostIP}\",\"ttl\":60}"
 
 ### Reverse entries
 podman exec -ti --env=ETCDCTL_API=3  etcd /usr/local/bin/etcdctl \
-  put /skydns/arpa/in-addr/$(echo $HostIP | tr '.' '/') '{"host": "rocknsm.lan"}'
+  put /skydns/arpa/in-addr/$(echo $HostIP | tr '.' '/') '{"host": "arch.msk.local"}'
 
 ### Check resolution
-dig +short msk.local @localhost
-dig +short -x ${HostIP} @localhost
+dig +short arch.msk.local @$coredns_ip
+dig +short -x ${HostIP} @$coredns_ip
