@@ -19,8 +19,5 @@ write_files:
    owner: hcops:hcops
    path: /opt/consul/config/consul_server.json
    permissions: '0644'
- - path: /etc/environment
-   permissions: 0644
-   content: CONSUL_HTTP_ADDR=${hostname}:8500
 runcmd:
   - [ systemctl, enable, consul ]
