@@ -12,10 +12,7 @@ sudo rm -rf /tmp/consul.zip
 
 consul version
 
-sudo mkdir -p /opt/consul/{config,data,tls/ca}
-sudo mkdir -p /etc/consul.d
-sudo chmod a+w /etc/consul.d
-
+sudo mkdir -p /opt/consul/{config,data}
 sudo chown -R hcops:hcops /opt/consul
 
 cat <<-EOF | sudo tee /etc/systemd/system/consul.service
@@ -27,7 +24,7 @@ After=network-online.target
 
 [Service]
 ExecReload=/usr/local/bin/consul reload
-ExecStart=/usr/local/bin/consul agent -config-dir /etc/consul.d -data-dir /opt/consul
+ExecStart=/usr/local/bin/consul agent -config-dir /opt/consul/config -data-dir /opt/consul/data
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=infinity
@@ -43,5 +40,3 @@ Group=hcops
 [Install]
 WantedBy=multi-user.target
 EOF
-
-sudo systemctl enable consul

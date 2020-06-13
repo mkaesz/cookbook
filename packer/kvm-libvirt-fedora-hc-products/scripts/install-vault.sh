@@ -14,8 +14,8 @@ sudo setcap cap_ipc_lock=+ep $(readlink -f $(which vault))
 
 vault version
 
-sudo mkdir -p /etc/vault.d
-sudo chmod a+w /etc/vault.d
+sudo mkdir -p /opt/vault
+sudo chown -R hcops:hcops /opt/vault
 
 cat <<-EOF | sudo tee /etc/systemd/system/vault.service
 [Unit]
@@ -26,7 +26,7 @@ After=network-online.target
 
 [Service]
 ExecReload=/bin/kill --signal HUP \$MAINPID
-ExecStart=/usr/local/bin/vault agent -config /etc/vault.d
+ExecStart=/usr/local/bin/vault agent -config /opt/vault
 KillMode=process
 AmbientCapabilities=CAP_IPC_LOCK
 Capabilities=CAP_IPC_LOCK+ep
@@ -45,5 +45,3 @@ Group=hcops
 [Install]
 WantedBy=multi-user.target
 EOF
-
-sudo systemctl enable vault

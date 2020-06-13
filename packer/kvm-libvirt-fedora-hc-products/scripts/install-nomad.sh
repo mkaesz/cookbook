@@ -21,9 +21,7 @@ sudo rm -rf /tmp/nomad.zip
 
 nomad version
 
-sudo mkdir -p /opt/nomad
-sudo mkdir -p /etc/nomad.d
-sudo chmod a+w /etc/nomad.d
+sudo mkdir -p /opt/nomad/{config,data}
 
 sudo chown -R hcops:hcops /opt/nomad
 
@@ -36,7 +34,7 @@ After=network-online.target
 
 [Service]
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=/usr/local/bin/nomad agent -config /etc/nomad.d -data-dir /opt/nomad
+ExecStart=/usr/local/bin/nomad agent -config /opt/nomad/config -data-dir /opt/nomad/data
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=infinity
@@ -50,5 +48,3 @@ TasksMax=infinity
 [Install]
 WantedBy=multi-user.target
 EOF
-
-sudo systemctl enable nomad
