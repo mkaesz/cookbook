@@ -2,46 +2,45 @@ provider "libvirt" {
   uri   = "qemu+ssh://root@192.168.0.171/system"
 }
 
-resource "libvirt_pool" "consul" {
-  name = "consul"
+resource "libvirt_pool" "nomad" {
+  name = "nomad"
   type = "dir"
-  path = "/tmp/terraform-provider-libvirt-pool-consul"
+  path = "/tmp/terraform-provider-libvirt-pool-nomad"
 }
-
 resource "libvirt_volume" "os_image" {
   name   = "os_image"
   source = "http://192.168.0.171:8088/workspace/images/fedora32-kvm-hc-products-cloudinit.qcow2"
 }
 
 resource "libvirt_volume" "volume" {
-  name           = "volume-consul-${count.index}"
+  name           = "volume-nomad-${count.index}"
   base_volume_id = libvirt_volume.os_image.id
-  count	         = var.consul_cluster_size
+  count	         = var.nomad_cluster_size
 }
 
-locals {
-  consul_cluster_nodes_expanded = {
-    for i in range(0, var.consul_cluster_size):i => format("%s%d", "consul-node-", i)
-  }
-}
-
-data "template_file" "consul_server_config" {
-  template = "${file("${path.module}/templates/consul-server.json.tpl")}"
+data "template_file" "nomad_server_config" {
+  template = "${file("${path.module}/templates/nomad-server.hcl.tpl")}"
   vars = {
-    node_name = "consul-node-${count.index}"
-    cluster_size = var.consul_cluster_size
-    consul_cluster_nodes = jsonencode(values(local.consul_cluster_nodes_expanded))
+    cluster_size = var.nomad_cluster_size
   }
-  count = var.consul_cluster_size
+  count = var.nomad_cluster_size
 }
 
+data "template_file" "consul_client_config" {
+  template = "${file("${path.module}/templates/consul-client.json.tpl")}"
+vars = {
+  node_name = "nomad-node-${count.index}"
+}
+  count = var.nomad_cluster_size
+}
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname = "consul-node-${count.index}"
-    consul_server_config = base64encode(data.template_file.consul_server_config[count.index].rendered)
+    hostname = "nomad-node-${count.index}"
+    nomad_server_config = base64encode(data.template_file.nomad_server_config[count.index].rendered)
+    consul_client_config = base64encode(data.template_file.consul_client_config[count.index].rendered)
   }
-  count	= var.consul_cluster_size
+  count	= var.nomad_cluster_size
 }
 
 data "template_file" "network_config" {
@@ -52,13 +51,13 @@ resource "libvirt_cloudinit_disk" "commoninit" {
   name           = "commoninit-${count.index}.iso"
   user_data      = data.template_file.user_data[count.index].rendered
   network_config = data.template_file.network_config.rendered
-  pool           = libvirt_pool.fedora.name
-  count          = var.consul_cluster_size
+  pool           = libvirt_pool.nomad.name
+  count          = var.nomad_cluster_size
 }
 
-resource "libvirt_domain" "consul-node" {
-  name = "consul-node-${count.index}"
-  count = var.consul_cluster_size
+resource "libvirt_domain" "nomad-node" {
+  name = "nomad-node-${count.index}"
+  count = var.nomad_cluster_size
 
   cloudinit = libvirt_cloudinit_disk.commoninit[count.index].id
 
@@ -90,9 +89,9 @@ EOT
 }
 
 output "nodes" {
-  value = libvirt_domain.consul-node.*.name
+  value = libvirt_domain.nomad-node.*.name
 }
 
 output "ips" {
-  value = libvirt_domain.consul-node.*.network_interface.0.addresses
+  value = libvirt_domain.nomad-node.*.network_interface.0.addresses
 }
