@@ -15,9 +15,9 @@ power_state:
   condition: True
 write_files:
  - encoding: b64
-   content: ${consul_server_config}
+   content: ${consul_config}
    owner: hcops:hcops
-   path: /opt/consul/config/consul_server.json
+   path: /opt/consul/config/config.json
    permissions: '0644'
  - encoding: b64
    content: ${ca_file}
