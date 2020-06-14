@@ -60,6 +60,7 @@ data "template_file" "user_data_nomad_server" {
     nomad_file_name = "nomad-server.hcl"
     nomad_config = base64encode(data.template_file.nomad_server_config[count.index].rendered)
     consul_client_config = base64encode(data.template_file.nomad_server_consul_client_config[count.index].rendered)
+    ca_cert = base64encode(file("${path.module}/consul-ca.pem"))
   }
   count	= var.nomad_cluster_size
 }
@@ -71,6 +72,7 @@ data "template_file" "user_data_nomad_client" {
     nomad_file_name = "nomad-worker.hcl"
     nomad_config = base64encode(data.template_file.nomad_client_config[count.index].rendered)
     consul_client_config = base64encode(data.template_file.nomad_client_consul_client_config[count.index].rendered)
+    ca_cert = base64encode(file("${path.module}/consul-ca.pem"))
   }
   count	= var.nomad_workers
 }

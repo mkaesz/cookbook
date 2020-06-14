@@ -24,6 +24,11 @@ write_files:
    owner: hcops:hcops
    path: /opt/consul/config/consul_client.json
    permissions: '0644'
+ - encoding: b64
+   content: ${ca_cert}
+   owner: hcops:hcops
+   path: /opt/consul/config/consul-ca.pem
+   permissions: '0644'
 runcmd:
   - [ systemctl, enable, consul ]
   - [ systemctl, enable, nomad ]

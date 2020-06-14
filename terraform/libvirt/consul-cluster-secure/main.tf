@@ -173,3 +173,7 @@ output "nodes" {
 output "ips" {
   value = libvirt_domain.consul_server.*.network_interface.0.addresses
 }
+
+output "consul-ca" {
+  value = tls_self_signed_cert.consul-ca.cert_pem
+}
