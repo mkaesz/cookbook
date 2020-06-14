@@ -2,6 +2,11 @@ provider "libvirt" {
   uri   = "qemu+ssh://root@192.168.0.171/system"
 }
 
+provider "consul" {
+  address    = "${var.consul_datacenter}-consul-server-0:8500"
+  datacenter = var.consul_datacenter
+}
+
 resource "libvirt_pool" "consul" {
   name = "consul"
   type = "dir"
