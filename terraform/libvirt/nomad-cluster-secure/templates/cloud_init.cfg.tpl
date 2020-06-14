@@ -15,24 +15,15 @@ power_state:
   condition: True
 write_files:
  - encoding: b64
-   content: ${consul_server_config}
+   content: ${nomad_config}
    owner: hcops:hcops
-   path: /opt/consul/config/consul_server.json
+   path: /opt/nomad/config/${nomad_file_name}.hcl
    permissions: '0644'
  - encoding: b64
-   content: ${ca_file}
+   content: ${consul_client_config}
    owner: hcops:hcops
-   path: /opt/consul/config/consul-ca.pem
-   permissions: '0644'
- - encoding: b64
-   content: ${cert_file}
-   owner: hcops:hcops
-   path: /opt/consul/config/${hostname}.crt
-   permissions: '0644'
- - encoding: b64
-   content: ${key_file}
-   owner: hcops:hcops
-   path: /opt/consul/config/${hostname}.key
+   path: /opt/consul/config/consul_client.json
    permissions: '0644'
 runcmd:
   - [ systemctl, enable, consul ]
+  - [ systemctl, enable, nomad ]
