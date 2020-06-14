@@ -15,9 +15,9 @@ power_state:
   condition: True
 write_files:
  - encoding: b64
-   content: ${nomad_server_config}
+   content: ${nomad_config}
    owner: hcops:hcops
-   path: /opt/nomad/config/nomad_server.hcl
+   path: /opt/nomad/config/${nomad_file_name}.hcl
    permissions: '0644'
  - encoding: b64
    content: ${consul_client_config}
