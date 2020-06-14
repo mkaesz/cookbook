@@ -52,7 +52,7 @@ resource "libvirt_cloudinit_disk" "commoninit" {
   name           = "commoninit-${count.index}.iso"
   user_data      = data.template_file.user_data[count.index].rendered
   network_config = data.template_file.network_config.rendered
-  pool           = libvirt_pool.fedora.name
+  pool           = libvirt_pool.consul.name
   count          = var.consul_cluster_size
 }
 
