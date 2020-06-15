@@ -1,8 +1,7 @@
 # Access a key in Consul
 
 provider "consul" {
-     address    = "192.168.122.49:8500"
-     #address    = "dc1-consul-server-0:8500"
+     address    = "dc1-server-consul-0.msk.local:8500"
      datacenter ="dc1" 
      scheme = "http"
    }
@@ -15,7 +14,7 @@ resource "consul_keys" "app" {
 }
 
 resource "consul_license" "license" {
-  license = file("license.hclic")
+  license = file("~/workspace/consul-license.hclic")
 }
 
 resource "consul_namespace" "production" {

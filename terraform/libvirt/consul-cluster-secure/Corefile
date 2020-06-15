@@ -1,0 +1,11 @@
+. {
+    etcd msk.local {
+        stubzones
+        path /skydns
+        endpoint http://{$ETCD_IP}:4001
+        upstream /etc/resolv.conf
+    }
+    cache 160 skydns.local
+    proxy . /etc/resolv.conf
+    log
+}
