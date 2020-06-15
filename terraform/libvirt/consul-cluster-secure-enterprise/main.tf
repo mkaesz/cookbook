@@ -3,7 +3,7 @@ provider "libvirt" {
 }
 
 provider "consul" {
-  address    = "${var.consul_datacenter}-consul-server-0:8500"
+  address    = "dc1-server-consul-0.msk.local:8500"
   datacenter = var.consul_datacenter
 }
 
