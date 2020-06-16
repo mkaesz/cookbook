@@ -15,11 +15,6 @@ power_state:
   condition: True
 write_files:
  - encoding: b64
-   content: ${consul_config}
-   owner: hcops:hcops
-   path: /opt/consul/config/config.json
-   permissions: '0644'
- - encoding: b64
    content: ${ca_file}
    owner: hcops:hcops
    path: /opt/consul/config/consul-ca.pem
@@ -34,5 +29,10 @@ write_files:
    owner: hcops:hcops
    path: /opt/consul/config/${hostname}.key
    permissions: '0644'
-runcmd:
-  - [ systemctl, enable, consul ]
+ - path: /etc/environment
+   permissions: 0644
+   content: |
+     CONSUL_HTTP_ADDR=https://dc1-server-consul-0:8501
+     CONSUL_CACERT=/opt/consul/config/consul-ca.pem
+     CONSUL_CLIENT_CERT=/opt/consul/config/${hostname}.crt
+     CONSUL_CLIENT_KEY=/opt/consul/config/${hostname}.key

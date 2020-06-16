@@ -2,7 +2,7 @@
   "server": true,
   "datacenter": "${datacenter}",
   "primary_datacenter": "${datacenter}",
-  "ui": false,
+  "ui": true,
   "encrypt": "${gossip_password}",
   "log_level": "INFO",
   "node_name": "${node_name}",
@@ -12,7 +12,7 @@
   "non_voting_server": false,
   "disable_update_check": true,
   "bind_addr": "{{ GetInterfaceIP \"eth0\" }}",
-  "client_addr": "127.0.0.1",
+  "client_addr": "0.0.0.0",
   "enable_script_checks": false,
   "enable_local_script_checks": true,
   "bootstrap_expect": ${cluster_size},
@@ -31,7 +31,7 @@
     "allow_tls": true
   },
   "ports": {
-    "http": -1,
+    "http": 8500,
     "https": 8501
   },
   "connect": {
