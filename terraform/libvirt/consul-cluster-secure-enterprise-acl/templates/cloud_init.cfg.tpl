@@ -34,5 +34,12 @@ write_files:
    owner: hcops:hcops
    path: /opt/consul/config/${hostname}.key
    permissions: '0644'
+ - path: /etc/environment
+   permissions: 0644
+   content: |
+     CONSUL_HTTP_ADDR=https://dc1-server-consul-0:8501
+     CONSUL_CACERT=/opt/consul/config/consul-ca.pem
+     CONSUL_CLIENT_CERT=/opt/consul/config/${hostname}.crt
+     CONSUL_CLIENT_KEY=/opt/consul/config/${hostname}.key
 runcmd:
   - [ systemctl, enable, consul ]

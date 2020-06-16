@@ -3,11 +3,16 @@ provider "consul" {
   datacenter = var.consul_datacenter
 }
 
+resource "time_sleep" "wait_10_seconds" {
+  depends_on = [libvirt_domain.consul_server]
+
+  create_duration = "10s"
+}
+
 resource "consul_license" "license" {
   license = file("~/workspace/consul-license.hclic")
-
- # depends_on = [
- #   libvirt_domain.consul_server,
- # ]
+  depends_on = [
+    time_sleep.wait_10_seconds,
+  ]
 }
 
