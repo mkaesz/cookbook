@@ -25,6 +25,15 @@ resource "consul_acl_policy" "nomad_server_policy" {
     node "${var.datacenter}-server-nomad-${count.index}" {
       policy = "write"
     }
+    
+    node "${var.datacenter}-server-nomad-${count.index}" {
+      policy = "read"
+    }
+   
+    service_prefix "" {
+      policy = "write"
+    }
+
     agent "${var.datacenter}-server-nomad-${count.index}" {
       policy = "write"
     }

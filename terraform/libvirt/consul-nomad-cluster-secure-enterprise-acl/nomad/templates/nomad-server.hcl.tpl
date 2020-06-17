@@ -3,7 +3,7 @@ bind_addr="${node_name}"
 disable_update_check = true
 enable_syslog = true
 log_level = "INFO"
-log_file = "/opt/nomad/data"
+log_file = "/opt/nomad/data/"
 name = "${node_name}"
 region = "europe"
 
