@@ -18,8 +18,8 @@ data "template_file" "user_data" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
     hostname = "${var.datacenter}-bastion"
-    consul_ca_file      = base64encode(var.consul_cli_ca_cert_pem)
-    nomad_ca_file       = base64encode(var.nomad_cli_ca_cert_pem)
+    consul_ca_file      = base64encode(var.consul_ca_cert_pem)
+    nomad_ca_file       = base64encode(var.nomad_ca_cert_pem)
     consul_cert_file    = base64encode(var.consul_cli_cert_pem)
     nomad_cert_file     = base64encode(var.nomad_cli_cert_pem)
     consul_key_file     = base64encode(var.consul_cli_private_key_pem)

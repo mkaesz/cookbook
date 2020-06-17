@@ -8,7 +8,7 @@ variable "os_image" {
   default     = "http://192.168.0.171:8088/workspace/images/fedora32-kvm-hc-products-cloudinit.qcow2"
 }
 
-variable "consul_cli_ca_cert_pem" {}
+variable "consul_ca_cert_pem" {}
 
 variable "consul_cli_private_key_pem" {}
 
@@ -16,7 +16,7 @@ variable "consul_cli_cert_pem" {}
 
 variable "consul_master_token" {}
 
-variable "nomad_cli_ca_cert_pem" {}
+variable "nomad_ca_cert_pem" {}
 
 variable "nomad_cli_private_key_pem" {}
 

@@ -8,7 +8,7 @@ variable "nomad_cluster_size" {
   default = 3
 }
 
-variable "consul_datacenter" {
+variable "datacenter" {
   description = "The datacenter."
   default = "dc1"
 }

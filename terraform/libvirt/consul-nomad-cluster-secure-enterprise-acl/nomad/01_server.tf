@@ -1,17 +1,62 @@
-resource "libvirt_volume" "volume_nomad_server" {
+resource "libvirt_pool" "nomad" {
+  name = "nomad"
+  type = "dir"
+  path = "/tmp/terraform-provider-libvirt-pool-nomad"
+}
+
+resource "libvirt_volume" "os_image" {
+  name   = "os_image"
+  source = var.os_image 
+}
+
+resource "tls_private_key" "nomad_ca" {
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+resource "tls_self_signed_cert" "nomad_ca" {
+  key_algorithm   = tls_private_key.nomad_ca.algorithm
+  private_key_pem = tls_private_key.nomad_ca.private_key_pem
+
+  subject {
+    common_name  = "nomad.msk.local"
+    organization = "mskmania"
+  }
+
+  validity_period_hours = 8760
+  is_ca_certificate     = true
+
+  allowed_uses = [
+    "cert_signing",
+    "digital_signature",
+    "key_encipherment",
+  ]
+}
+
+resource "tls_private_key" "nomad" {
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+resource "random_string" "nomad_gossip_password" {
+  length = 16
+  special = true
+}
+
+resource "libvirt_volume" "volume_server" {
   name           = "volume-nomad-server-${count.index}"
   base_volume_id = libvirt_volume.os_image.id
-  count	         = var.nomad_cluster_size
+  count	         = var.cluster_size
 }
 
 resource "tls_cert_request" "consul_client" {
-  key_algorithm   = tls_private_key.consul.algorithm
-  private_key_pem = tls_private_key.consul.private_key_pem
+  key_algorithm   = var.consul_private_key_algorithm
+  private_key_pem = var.consul_private_key_pem
 
   dns_names = [
-    "${var.consul_datacenter}-client-consul-${count.index}",
-    "${var.consul_datacenter}-server-nomad-${count.index}",
-    "client.${var.consul_datacenter}.consul",
+    "${var.datacenter}-client-consul-${count.index}",
+    "${var.datacenter}-server-nomad-${count.index}",
+    "client.${var.datacenter}.consul",
     "localhost"
   ]
 
@@ -20,17 +65,17 @@ resource "tls_cert_request" "consul_client" {
   ]
 
   subject {
-    common_name  = "${var.consul_datacenter}-client-consul-${count.index}"
+    common_name  = "${var.datacenter}-client-consul-${count.index}"
     organization = "mskmania"
   }
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 resource "tls_locally_signed_cert" "consul_client" {
   cert_request_pem   = tls_cert_request.consul_client[count.index].cert_request_pem
-  ca_key_algorithm   = tls_private_key.consul_ca.algorithm
-  ca_private_key_pem = tls_private_key.consul_ca.private_key_pem
-  ca_cert_pem        = tls_self_signed_cert.consul_ca.cert_pem
+  ca_key_algorithm   = var.consul_private_key_algorithm
+  ca_private_key_pem = var.consul_private_key_pem 
+  ca_cert_pem        = var.consul_ca_cert_pem
 
   validity_period_hours = 8760
 
@@ -41,7 +86,7 @@ resource "tls_locally_signed_cert" "consul_client" {
     "key_encipherment",
     "server_auth",
   ]
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 resource "tls_cert_request" "nomad_server" {
@@ -49,8 +94,8 @@ resource "tls_cert_request" "nomad_server" {
   private_key_pem = tls_private_key.nomad.private_key_pem
 
   dns_names = [
-    "${var.consul_datacenter}-server-nomad-${count.index}",
-    "server.${var.consul_datacenter}.nomad",
+    "${var.datacenter}-server-nomad-${count.index}",
+    "server.${var.datacenter}.nomad",
     "server.global.nomad",
     "server.europe.nomad",
     "localhost",
@@ -58,10 +103,10 @@ resource "tls_cert_request" "nomad_server" {
   ]
 
   subject {
-    common_name  = "${var.consul_datacenter}-server-nomad-${count.index}"
+    common_name  = "${var.datacenter}-server-nomad-${count.index}"
     organization = "mskmania"
   }
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 resource "tls_locally_signed_cert" "nomad_server" {
@@ -79,46 +124,46 @@ resource "tls_locally_signed_cert" "nomad_server" {
     "key_encipherment",
     "server_auth",
   ]
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 data "template_file" "consul_client_config" {
-  template = "${file("${path.module}/templates/consul/consul-client.json.tpl")}"
+  template = "${file("${path.module}/templates/consul-client.json.tpl")}"
   vars = {
-    node_name = "${var.consul_datacenter}-server-nomad-${count.index}"
-    consul_cluster_nodes = jsonencode(values(local.consul_cluster_servers_expanded))
-    gossip_password = base64encode(random_string.consul_gossip_password.result)
-    datacenter = var.consul_datacenter
+    node_name = "${var.datacenter}-server-nomad-${count.index}"
+    consul_cluster_nodes = jsonencode(values(var.consul_cluster_servers))
+    gossip_password = base64encode(var.consul_gossip_password)
+    datacenter = var.datacenter
     consul_default_token = random_uuid.consul_default_token[count.index].result
   }
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 data "template_file" "nomad_server_config" {
-  template = "${file("${path.module}/templates/nomad/nomad-server.hcl.tpl")}"
+  template = "${file("${path.module}/templates/nomad-server.hcl.tpl")}"
   vars = {
-    cluster_size     = var.nomad_cluster_size
-    node_name        = "${var.consul_datacenter}-server-nomad-${count.index}"
-    datacenter       = var.consul_datacenter
+    cluster_size     = var.cluster_size
+    node_name        = "${var.datacenter}-server-nomad-${count.index}"
+    datacenter       = var.datacenter
     gossip_password  = base64encode(random_string.nomad_gossip_password.result)
   }
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 data "template_file" "user_data_nomad_server" {
-  template = "${file("${path.module}/templates/nomad/cloud_init.cfg.tpl")}"
+  template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname         = "${var.consul_datacenter}-server-nomad-${count.index}"
+    hostname         = "${var.datacenter}-server-nomad-${count.index}"
     consul_config    = base64encode(data.template_file.consul_client_config[count.index].rendered)
     nomad_config     = base64encode(data.template_file.nomad_server_config[count.index].rendered)
-    consul_ca_file   = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
+    consul_ca_file   = base64encode(var.consul_ca_cert_pem)
     nomad_ca_file    = base64encode(tls_self_signed_cert.nomad_ca.cert_pem)
     consul_cert_file = base64encode(tls_locally_signed_cert.consul_client[count.index].cert_pem)
     nomad_cert_file  = base64encode(tls_locally_signed_cert.nomad_server[count.index].cert_pem)
-    consul_key_file  = base64encode(tls_private_key.consul.private_key_pem)
+    consul_key_file  = base64encode(var.consul_private_key_pem)
     nomad_key_file   = base64encode(tls_private_key.nomad.private_key_pem)
   }
-  count	= var.nomad_cluster_size
+  count	= var.cluster_size
 }
 
 data "template_file" "network_config_client" {
@@ -130,20 +175,20 @@ resource "libvirt_cloudinit_disk" "commoninit_nomad_server" {
   user_data      = data.template_file.user_data_nomad_server[count.index].rendered
   network_config = data.template_file.network_config_client.rendered
   pool           = libvirt_pool.nomad.name
-  count          = var.nomad_cluster_size
+  count          = var.cluster_size
 }
 
 resource "random_uuid" "consul_default_token" { 
-  count = var.nomad_cluster_size
+  count = var.cluster_size
 }
 
 resource "libvirt_domain" "nomad_server" {
-  name       = "${var.consul_datacenter}-server-nomad-${count.index}"
-  count      = var.nomad_cluster_size
+  name       = "${var.datacenter}-server-nomad-${count.index}"
+  count      = var.cluster_size
   cloudinit  = libvirt_cloudinit_disk.commoninit_nomad_server[count.index].id
 
   disk {
-    volume_id = element(libvirt_volume.volume_nomad_server.*.id, count.index)
+    volume_id = element(libvirt_volume.volume_server.*.id, count.index)
   }
 
   network_interface {
@@ -179,6 +224,6 @@ EOT
  }
 }
   depends_on = [
-    consul_acl_policy.nomad_server_agent_client_policy,
+    consul_acl_policy.nomad_server_policy,
   ]
 }

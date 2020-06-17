@@ -25,3 +25,20 @@ resource "consul_autopilot_config" "config" {
     time_sleep.wait_20_seconds,
   ]
 }
+
+resource "consul_acl_policy" "agent_policy" {
+  name        = "${var.datacenter}-server-consul-${count.index}"
+  datacenters = ["${var.datacenter}"]
+  rules       = <<-RULE
+    node "${var.datacenter}-server-consul-${count.index}" {
+      policy = "write"
+    }
+    agent "${var.datacenter}-server-consul-${count.index}" {
+      policy = "write"
+    }
+    RULE
+  count = var.cluster_size
+  depends_on = [
+    time_sleep.wait_20_seconds,
+  ]
+}
