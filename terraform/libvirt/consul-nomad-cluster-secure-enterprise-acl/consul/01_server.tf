@@ -1,7 +1,60 @@
+resource "libvirt_volume" "os_image" {
+  name   = "os_image"
+  source = var.os_image
+}
+
+resource "libvirt_pool" "consul" {
+  name = "consul"
+  type = "dir"
+  path = "/tmp/terraform-provider-libvirt-pool-consul"
+}
+
+locals {
+  consul_cluster_servers_expanded = {
+    for i in range(0, var.cluster_size):i => format("%s%s%d", var.datacenter, "-server-consul-", i)
+  }
+}
+
+resource "tls_private_key" "consul_ca" {
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+resource "tls_self_signed_cert" "consul_ca" {
+  key_algorithm   = tls_private_key.consul_ca.algorithm
+  private_key_pem = tls_private_key.consul_ca.private_key_pem
+
+  subject {
+    common_name  = "consul.msk.local"
+    organization = "mskmania"
+  }
+
+  validity_period_hours = 8760
+  is_ca_certificate     = true
+
+  allowed_uses = [
+    "cert_signing",
+    "digital_signature",
+    "key_encipherment",
+  ]
+}
+
+resource "tls_private_key" "consul" {
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+resource "random_string" "consul_gossip_password" {
+  length = 16
+  special = true
+}
+
+resource "random_uuid" "consul_master_token" { }
+
 resource "libvirt_volume" "volume_server" {
   name           = "volume-consul-server-${count.index}"
   base_volume_id = libvirt_volume.os_image.id
-  count	         = var.consul_cluster_size
+  count	         = var.cluster_size
 }
 
 resource "tls_cert_request" "consul_server" {
@@ -9,18 +62,18 @@ resource "tls_cert_request" "consul_server" {
   private_key_pem = tls_private_key.consul.private_key_pem
 
   dns_names = [
-    "${var.consul_datacenter}-server-consul-${count.index}",
-    "server.${var.consul_datacenter}.consul",
+    "${var.datacenter}-server-consul-${count.index}",
+    "server.${var.datacenter}.consul",
     "localhost",
     "127.0.0.1",
   ]
 
   subject {
-    common_name  = "${var.consul_datacenter}-server-consul-${count.index}"
+    common_name  = "${var.datacenter}-server-consul-${count.index}"
     organization = "mskmania"
   }
 
-  count = var.consul_cluster_size
+  count = var.cluster_size
 }
 
 resource "tls_locally_signed_cert" "consul_server" {
@@ -39,32 +92,32 @@ resource "tls_locally_signed_cert" "consul_server" {
     "key_encipherment",
     "server_auth",
   ]
-  count = var.consul_cluster_size
+  count = var.cluster_size
 }
 
 data "template_file" "consul_server_config" {
-  template = "${file("${path.module}/templates/consul/consul-server.json.tpl")}"
+  template = "${file("${path.module}/templates/consul-server.json.tpl")}"
   vars = {
-    node_name            = "${var.consul_datacenter}-server-consul-${count.index}"
-    cluster_size         = var.consul_cluster_size
+    node_name            = "${var.datacenter}-server-consul-${count.index}"
+    cluster_size         = var.cluster_size
     consul_cluster_nodes = jsonencode(values(local.consul_cluster_servers_expanded))
     gossip_password      = base64encode(random_string.consul_gossip_password.result)
-    datacenter           = var.consul_datacenter
+    datacenter           = var.datacenter
     consul_master_token  = random_uuid.consul_master_token.result
   }
-  count = var.consul_cluster_size
+  count = var.cluster_size
 }
 
 data "template_file" "user_data_consul_server" {
-  template = "${file("${path.module}/templates/consul/cloud_init.cfg.tpl")}"
+  template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname      = "${var.consul_datacenter}-server-consul-${count.index}"
+    hostname      = "${var.datacenter}-server-consul-${count.index}"
     consul_config = base64encode(data.template_file.consul_server_config[count.index].rendered)
     ca_file       = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
     cert_file     = base64encode(tls_locally_signed_cert.consul_server[count.index].cert_pem)
     key_file      = base64encode(tls_private_key.consul.private_key_pem)
   }
-  count	= var.consul_cluster_size
+  count	= var.cluster_size
 }
 
 data "template_file" "network_config_consul_server" {
@@ -76,12 +129,12 @@ resource "libvirt_cloudinit_disk" "commoninit_consul_server" {
   user_data      = data.template_file.user_data_consul_server[count.index].rendered
   network_config = data.template_file.network_config_consul_server.rendered
   pool           = libvirt_pool.consul.name
-  count          = var.consul_cluster_size
+  count          = var.cluster_size
 }
 
 resource "libvirt_domain" "consul_server" {
-  name = "${var.consul_datacenter}-server-consul-${count.index}"
-  count = var.consul_cluster_size
+  name = "${var.datacenter}-server-consul-${count.index}"
+  count = var.cluster_size
 
   cloudinit = libvirt_cloudinit_disk.commoninit_consul_server[count.index].id
 
@@ -109,4 +162,4 @@ sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name}
 EOT  
 }
-
+}
