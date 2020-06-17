@@ -25,6 +25,33 @@ tls {
   verify_https_client    = true
 }
 
+acl {
+  enabled = true
+}
+
+audit {
+  enable = true
+  sink "audit" {
+    type               = "file"
+    delivery_guarantee = "enforced"
+    format             = "json"
+    path               = "/opt/nomad/data/audit/audit.log"
+  }
+}
+
+autopilot {
+    cleanup_dead_servers = true
+    enable_redundancy_zones = false
+    disable_upgrade_migration = false
+    enable_custom_upgrades = false
+}
+
+telemetry {
+  publish_allocation_metrics = true
+  publish_node_metrics       = true
+  prometheus_metrics         = true
+}
+
 consul {
   address = "127.0.0.1:8501"
   auto_advertise = true
