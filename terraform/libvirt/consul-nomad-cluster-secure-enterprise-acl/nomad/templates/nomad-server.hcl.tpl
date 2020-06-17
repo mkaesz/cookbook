@@ -13,6 +13,18 @@ server {
   encrypt = "${gossip_password}"
 }
 
+tls {
+  http = true
+  rpc  = true
+
+  ca_file   = "/opt/nomad/config/nomad-ca.pem"
+  cert_file = "/opt/nomad/config/${node_name}.crt"
+  key_file  = "/opt/nomad/config/${node_name}.key"
+
+  verify_server_hostname = true
+  verify_https_client    = true
+}
+
 consul {
   address = "127.0.0.1:8501"
   auto_advertise = true

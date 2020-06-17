@@ -48,7 +48,7 @@ write_files:
    permissions: 0644
    content: |
      CONSUL_HTTP_ADDR=https://dc1-server-consul-0:8501
-     NOMAD_ADDR=https://dc1-server-nomad-0:8501
+     NOMAD_ADDR=https://dc1-server-nomad-0:4646
      CONSUL_CACERT=/opt/consul/config/consul-ca.pem
      NOMAD_CACERT=/opt/nomad/config/nomad-ca.pem
      CONSUL_CLIENT_CERT=/opt/consul/config/${hostname}.crt
