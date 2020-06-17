@@ -80,7 +80,7 @@ resource "tls_locally_signed_cert" "bastion_nomad" {
 }
 
 data "template_file" "user_data_bastion" {
-  template = "${file("${path.module}/templates/cloud_init.bastion.cfg.tpl")}"
+  template = "${file("${path.module}/templates/bastion/cloud_init.cfg.tpl")}"
   vars = {
     hostname = "${var.consul_datacenter}-bastion"
     consul_ca_file = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
@@ -94,7 +94,7 @@ data "template_file" "user_data_bastion" {
 }
 
 data "template_file" "network_config_bastion" {
-  template = file("${path.module}/templates/network_config.cfg")
+  template = file("${path.module}/templates/network_config.cfg.tpl")
 }
 
 resource "libvirt_cloudinit_disk" "commoninit_bastion" {
@@ -105,8 +105,7 @@ resource "libvirt_cloudinit_disk" "commoninit_bastion" {
 }
 
 resource "libvirt_domain" "bastion" {
-  name = "${var.consul_datacenter}-bastion"
-
+  name      = "${var.consul_datacenter}-bastion"
   cloudinit = libvirt_cloudinit_disk.commoninit_bastion.id
 
   disk {
@@ -133,11 +132,4 @@ sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name}
 EOT  
 }
-}
-output "bastion" {
-  value = libvirt_domain.bastion.name
-}
-
-output "ip" {
-  value = libvirt_domain.bastion.network_interface.0.addresses
 }

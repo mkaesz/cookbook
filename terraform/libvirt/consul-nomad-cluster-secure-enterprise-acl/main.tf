@@ -8,7 +8,7 @@ resource "libvirt_pool" "consul" {
   path = "/tmp/terraform-provider-libvirt-pool-consul"
 }
 
-resource "libvirt_pool" "nomad_server" {
+resource "libvirt_pool" "nomad" {
   name = "nomad"
   type = "dir"
   path = "/tmp/terraform-provider-libvirt-pool-nomad"
@@ -100,7 +100,3 @@ resource "random_string" "nomad_gossip_password" {
 }
 
 resource "random_uuid" "consul_master_token" { }
-
-output "consul-ca" {
-  value = tls_self_signed_cert.consul_ca.cert_pem
-}

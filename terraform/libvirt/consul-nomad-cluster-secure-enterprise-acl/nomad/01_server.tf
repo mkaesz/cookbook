@@ -23,13 +23,11 @@ resource "tls_cert_request" "consul_client" {
     common_name  = "${var.consul_datacenter}-client-consul-${count.index}"
     organization = "mskmania"
   }
-
   count = var.nomad_cluster_size
 }
 
 resource "tls_locally_signed_cert" "consul_client" {
-  cert_request_pem = tls_cert_request.consul_client[count.index].cert_request_pem
-
+  cert_request_pem   = tls_cert_request.consul_client[count.index].cert_request_pem
   ca_key_algorithm   = tls_private_key.consul_ca.algorithm
   ca_private_key_pem = tls_private_key.consul_ca.private_key_pem
   ca_cert_pem        = tls_self_signed_cert.consul_ca.cert_pem
@@ -63,13 +61,11 @@ resource "tls_cert_request" "nomad_server" {
     common_name  = "${var.consul_datacenter}-server-nomad-${count.index}"
     organization = "mskmania"
   }
-
   count = var.nomad_cluster_size
 }
 
 resource "tls_locally_signed_cert" "nomad_server" {
-  cert_request_pem = tls_cert_request.nomad_server[count.index].cert_request_pem
-
+  cert_request_pem   = tls_cert_request.nomad_server[count.index].cert_request_pem
   ca_key_algorithm   = tls_private_key.nomad_ca.algorithm
   ca_private_key_pem = tls_private_key.nomad_ca.private_key_pem
   ca_cert_pem        = tls_self_signed_cert.nomad_ca.cert_pem
@@ -87,7 +83,7 @@ resource "tls_locally_signed_cert" "nomad_server" {
 }
 
 data "template_file" "consul_client_config" {
-  template = "${file("${path.module}/templates/consul-client.json.tpl")}"
+  template = "${file("${path.module}/templates/consul/consul-client.json.tpl")}"
   vars = {
     node_name = "${var.consul_datacenter}-server-nomad-${count.index}"
     consul_cluster_nodes = jsonencode(values(local.consul_cluster_servers_expanded))
@@ -99,7 +95,7 @@ data "template_file" "consul_client_config" {
 }
 
 data "template_file" "nomad_server_config" {
-  template = "${file("${path.module}/templates/nomad-server.hcl.tpl")}"
+  template = "${file("${path.module}/templates/nomad/nomad-server.hcl.tpl")}"
   vars = {
     cluster_size     = var.nomad_cluster_size
     node_name        = "${var.consul_datacenter}-server-nomad-${count.index}"
@@ -110,7 +106,7 @@ data "template_file" "nomad_server_config" {
 }
 
 data "template_file" "user_data_nomad_server" {
-  template = "${file("${path.module}/templates/cloud_init_nomad_server.cfg.tpl")}"
+  template = "${file("${path.module}/templates/nomad/cloud_init.cfg.tpl")}"
   vars = {
     hostname         = "${var.consul_datacenter}-server-nomad-${count.index}"
     consul_config    = base64encode(data.template_file.consul_client_config[count.index].rendered)
@@ -126,14 +122,14 @@ data "template_file" "user_data_nomad_server" {
 }
 
 data "template_file" "network_config_client" {
-  template = file("${path.module}/templates/network_config.cfg")
+  template = file("${path.module}/templates/network_config.cfg.tpl")
 }
 
 resource "libvirt_cloudinit_disk" "commoninit_nomad_server" {
   name           = "commoninit-nomad-server-${count.index}.iso"
   user_data      = data.template_file.user_data_nomad_server[count.index].rendered
   network_config = data.template_file.network_config_client.rendered
-  pool           = libvirt_pool.nomad_server.name
+  pool           = libvirt_pool.nomad.name
   count          = var.nomad_cluster_size
 }
 
@@ -163,7 +159,7 @@ sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl put /skydns
 EOT  
 }
 
-   provisioner "local-exec" {
+  provisioner "local-exec" {
     when = destroy 
     command = <<EOT
 sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
@@ -185,12 +181,4 @@ EOT
   depends_on = [
     consul_acl_policy.nomad_server_agent_client_policy,
   ]
-}
-
-output "nomad_cluster_size" {
-  value = libvirt_domain.nomad_server.*.name
-}
-
-output "nomad_server_ips" {
-  value = libvirt_domain.nomad_server.*.network_interface.0.addresses
 }

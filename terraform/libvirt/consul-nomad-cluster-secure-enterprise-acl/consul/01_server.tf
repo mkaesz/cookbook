@@ -20,7 +20,7 @@ resource "tls_cert_request" "consul_server" {
     organization = "mskmania"
   }
 
-  count          = var.consul_cluster_size
+  count = var.consul_cluster_size
 }
 
 resource "tls_locally_signed_cert" "consul_server" {
@@ -39,42 +39,42 @@ resource "tls_locally_signed_cert" "consul_server" {
     "key_encipherment",
     "server_auth",
   ]
-  count          = var.consul_cluster_size
+  count = var.consul_cluster_size
 }
 
 data "template_file" "consul_server_config" {
-  template = "${file("${path.module}/templates/consul-server.json.tpl")}"
+  template = "${file("${path.module}/templates/consul/consul-server.json.tpl")}"
   vars = {
-    node_name = "${var.consul_datacenter}-server-consul-${count.index}"
-    cluster_size = var.consul_cluster_size
+    node_name            = "${var.consul_datacenter}-server-consul-${count.index}"
+    cluster_size         = var.consul_cluster_size
     consul_cluster_nodes = jsonencode(values(local.consul_cluster_servers_expanded))
-    gossip_password = base64encode(random_string.consul_gossip_password.result)
-    datacenter = var.consul_datacenter
-    consul_master_token = random_uuid.consul_master_token.result
+    gossip_password      = base64encode(random_string.consul_gossip_password.result)
+    datacenter           = var.consul_datacenter
+    consul_master_token  = random_uuid.consul_master_token.result
   }
   count = var.consul_cluster_size
 }
 
-data "template_file" "user_data_server" {
-  template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
+data "template_file" "user_data_consul_server" {
+  template = "${file("${path.module}/templates/consul/cloud_init.cfg.tpl")}"
   vars = {
-    hostname = "${var.consul_datacenter}-server-consul-${count.index}"
+    hostname      = "${var.consul_datacenter}-server-consul-${count.index}"
     consul_config = base64encode(data.template_file.consul_server_config[count.index].rendered)
-    ca_file = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
-    cert_file = base64encode(tls_locally_signed_cert.consul_server[count.index].cert_pem)
-    key_file = base64encode(tls_private_key.consul.private_key_pem)
+    ca_file       = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
+    cert_file     = base64encode(tls_locally_signed_cert.consul_server[count.index].cert_pem)
+    key_file      = base64encode(tls_private_key.consul.private_key_pem)
   }
   count	= var.consul_cluster_size
 }
 
-data "template_file" "network_config_server" {
-  template = file("${path.module}/templates/network_config.cfg")
+data "template_file" "network_config_consul_server" {
+  template = file("${path.module}/templates/network_config.cfg.tpl")
 }
 
-resource "libvirt_cloudinit_disk" "commoninit_server" {
-  name           = "commoninit-server-${count.index}.iso"
-  user_data      = data.template_file.user_data_server[count.index].rendered
-  network_config = data.template_file.network_config_server.rendered
+resource "libvirt_cloudinit_disk" "commoninit_consul_server" {
+  name           = "commoninit-consul-server-${count.index}.iso"
+  user_data      = data.template_file.user_data_consul_server[count.index].rendered
+  network_config = data.template_file.network_config_consul_server.rendered
   pool           = libvirt_pool.consul.name
   count          = var.consul_cluster_size
 }
@@ -83,7 +83,7 @@ resource "libvirt_domain" "consul_server" {
   name = "${var.consul_datacenter}-server-consul-${count.index}"
   count = var.consul_cluster_size
 
-  cloudinit = libvirt_cloudinit_disk.commoninit_server[count.index].id
+  cloudinit = libvirt_cloudinit_disk.commoninit_consul_server[count.index].id
 
   disk {
     volume_id = element(libvirt_volume.volume_server.*.id, count.index)
@@ -102,7 +102,7 @@ sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl put /skydns
 EOT  
 }
 
-   provisioner "local-exec" {
+  provisioner "local-exec" {
     when = destroy 
     command = <<EOT
 sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
@@ -110,12 +110,3 @@ sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns
 EOT  
 }
 
-}
-
-output "servers" {
-  value = libvirt_domain.consul_server.*.name
-}
-
-output "server_ips" {
-  value = libvirt_domain.consul_server.*.network_interface.0.addresses
-}
