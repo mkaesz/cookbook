@@ -25,8 +25,10 @@
   "key_file": "/opt/consul/config/${node_name}.key",
   "acl": {
     "enabled": true,
-    "default_policy": "allow",
-    "enable_token_persistence": true
+    "enable_token_persistence": true,
+    "tokens": {
+      "agent": "${consul_default_token}"
+    }
   },
   "auto_encrypt": {
     "tls": true

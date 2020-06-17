@@ -51,6 +51,7 @@ data "template_file" "user_data_bastion" {
     ca_file = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
     cert_file = base64encode(tls_locally_signed_cert.bastion.cert_pem)
     key_file = base64encode(tls_private_key.consul.private_key_pem)
+    consul_master_token = random_uuid.consul_master_token.result
   }
 }
 
@@ -82,7 +83,7 @@ resource "libvirt_domain" "bastion" {
   provisioner "local-exec" {
     when = create
     command = <<EOT
-sudo podman pull quay.io/coreos/etcd
+sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl put /skydns/local/msk/${self.name} '{"host":"${self.network_interface.0.addresses.0}","ttl":60}'
 EOT  
 }
@@ -90,13 +91,11 @@ EOT
    provisioner "local-exec" {
     when = destroy 
     command = <<EOT
-sudo podman pull quay.io/coreos/etcd
+sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name}
 EOT  
 }
-
 }
-
 output "bastion" {
   value = libvirt_domain.bastion.name
 }

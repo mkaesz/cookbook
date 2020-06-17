@@ -14,8 +14,14 @@ resource "libvirt_volume" "os_image" {
 }
 
 locals {
-  consul_cluster_nodes_expanded = {
+  consul_cluster_servers_expanded = {
     for i in range(0, var.consul_cluster_size):i => format("%s%s%d", var.consul_datacenter, "-server-consul-", i)
+  }
+}
+
+locals {
+  consul_cluster_clients_expanded = {
+    for i in range(0, var.consul_clients):i => format("%s%s%d", var.consul_datacenter, "-clients-consul-", i)
   }
 }
 
@@ -52,6 +58,8 @@ resource "random_string" "consul_gossip_password" {
   length = 16
   special = true
 }
+
+resource "random_uuid" "consul_master_token" { }
 
 output "consul-ca" {
   value = tls_self_signed_cert.consul_ca.cert_pem

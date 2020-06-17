@@ -39,7 +39,11 @@
   },
   "acl": {
     "enabled": true,
-    "default_policy": "allow", 
+    "default_policy": "deny", 
+    "tokens": {
+      "master": "${consul_master_token}",
+      "agent": "${consul_master_token}"
+    },
     "enable_token_persistence": true
   },
   "node_meta": {

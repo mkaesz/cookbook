@@ -47,11 +47,12 @@ data "template_file" "consul_server_config" {
   vars = {
     node_name = "${var.consul_datacenter}-server-consul-${count.index}"
     cluster_size = var.consul_cluster_size
-    consul_cluster_nodes = jsonencode(values(local.consul_cluster_nodes_expanded))
+    consul_cluster_nodes = jsonencode(values(local.consul_cluster_servers_expanded))
     gossip_password = base64encode(random_string.consul_gossip_password.result)
     datacenter = var.consul_datacenter
-}
-count = var.consul_cluster_size
+    consul_master_token = random_uuid.consul_master_token.result
+  }
+  count = var.consul_cluster_size
 }
 
 data "template_file" "user_data_server" {
@@ -96,7 +97,7 @@ resource "libvirt_domain" "consul_server" {
   provisioner "local-exec" {
     when = create
     command = <<EOT
-sudo podman pull quay.io/coreos/etcd
+sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl put /skydns/local/msk/${self.name} '{"host":"${self.network_interface.0.addresses.0}","ttl":60}'
 EOT  
 }
@@ -104,7 +105,7 @@ EOT
    provisioner "local-exec" {
     when = destroy 
     command = <<EOT
-sudo podman pull quay.io/coreos/etcd
+sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name}
 EOT  
 }

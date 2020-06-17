@@ -36,3 +36,4 @@ write_files:
      CONSUL_CACERT=/opt/consul/config/consul-ca.pem
      CONSUL_CLIENT_CERT=/opt/consul/config/${hostname}.crt
      CONSUL_CLIENT_KEY=/opt/consul/config/${hostname}.key
+     CONSUL_HTTP_TOKEN=${consul_master_token}
