@@ -85,6 +85,20 @@ resource "consul_acl_policy" "nomad_worker_policy" {
     }
     RULE
   count = var.workers
+
+ provisioner "remote-exec" {
+   inline = [
+       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token_worker[count.index].result} -description '${self.name}' 2>&1",
+     ]
+
+   connection {
+      type = "ssh"
+      user = "mkaesz"
+      host = "dc1-bastion.msk.local"
+      private_key = file("~/.ssh/id_rsa")
+   }
+  }
+
  depends_on = [
     time_sleep.wait_20_seconds,
   ]
