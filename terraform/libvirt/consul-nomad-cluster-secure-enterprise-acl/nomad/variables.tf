@@ -2,6 +2,10 @@ variable "cluster_size" {
   default = 3
 }
 
+variable "workers" {
+  default = 4
+}
+
 variable "datacenter" {
   default = "dc1"
 }

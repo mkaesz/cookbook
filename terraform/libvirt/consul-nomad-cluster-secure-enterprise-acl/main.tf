@@ -25,6 +25,7 @@ module "nomad_cluster" {
   source = "./nomad"
 
   datacenter                       = var.datacenter
+  consul_server                    = module.consul_cluster.consul_server_0
   consul_gossip_password           = module.consul_cluster.consul_gossip_password 
   consul_master_token              = module.consul_cluster.consul_master_token
   consul_cluster_servers           = module.consul_cluster.consul_cluster_servers

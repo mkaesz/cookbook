@@ -4,6 +4,12 @@ provider "consul" {
   token      = var.consul_master_token
 }
 
+resource "time_sleep" "wait_20_seconds" {
+#  depends_on = [libvirt_domain.nomad_server]
+
+  create_duration = "40s"
+}
+
 resource "consul_acl_policy" "consul_client_policy" {
   name        = "${var.datacenter}-client-consul-${count.index}"
   datacenters = ["${var.datacenter}"]
@@ -16,6 +22,7 @@ resource "consul_acl_policy" "consul_client_policy" {
     }
     RULE
   count = var.cluster_size
+  depends_on = [time_sleep.wait_20_seconds]
 }
 
 resource "consul_acl_policy" "nomad_server_policy" {
@@ -39,4 +46,33 @@ resource "consul_acl_policy" "nomad_server_policy" {
     }
     RULE
   count = var.cluster_size
+  depends_on = [
+    time_sleep.wait_20_seconds,
+  ]
+}
+
+resource "consul_acl_policy" "nomad_worker_policy" {
+  name        = "${var.datacenter}-worker-nomad-${count.index}"
+  datacenters = ["${var.datacenter}"]
+  rules       = <<-RULE
+    node "${var.datacenter}-worker-nomad-${count.index}" {
+      policy = "write"
+    }
+    
+    node "${var.datacenter}-worker-nomad-${count.index}" {
+      policy = "read"
+    }
+   
+    service_prefix "" {
+      policy = "write"
+    }
+
+    agent "${var.datacenter}-worker-nomad-${count.index}" {
+      policy = "write"
+    }
+    RULE
+  count = var.workers
+  depends_on = [
+    time_sleep.wait_20_seconds,
+  ]
 }
