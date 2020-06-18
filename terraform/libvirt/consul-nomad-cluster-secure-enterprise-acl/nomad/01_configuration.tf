@@ -52,7 +52,7 @@ resource "consul_acl_policy" "nomad_server_policy" {
 
   provisioner "remote-exec" {
    inline = [
-       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token[count.index].result} -description '${self.name}' 2>&1",
+       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token[count.index].result} -description '${self.name}' > /dev/null 2>&1",
      ]
 
  connection {
@@ -88,7 +88,7 @@ resource "consul_acl_policy" "nomad_worker_policy" {
 
  provisioner "remote-exec" {
    inline = [
-       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token_worker[count.index].result} -description '${self.name}' 2>&1",
+       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token_worker[count.index].result} -description '${self.name}' > /dev/null 2>&1",
      ]
 
    connection {

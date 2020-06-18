@@ -153,16 +153,16 @@ resource "libvirt_domain" "nomad_worker" {
   provisioner "local-exec" {
     when = create
     command = <<EOT
-sudo podman pull quay.io/coreos/etcd 2>&1
-sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl put /skydns/local/msk/${self.name} '{"host":"${self.network_interface.0.addresses.0}","ttl":60}'
+sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1 
+sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl put /skydns/local/msk/${self.name} '{"host":"${self.network_interface.0.addresses.0}","ttl":60}' > /dev/null 2>&1
 EOT  
 }
 
    provisioner "local-exec" {
     when = destroy 
     command = <<EOT
-sudo podman pull quay.io/coreos/etcd 2>&1
-sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name}
+sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
+sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name} > /dev/null 2>&1
 EOT  
 }
 
