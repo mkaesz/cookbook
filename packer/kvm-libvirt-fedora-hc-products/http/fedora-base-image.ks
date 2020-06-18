@@ -164,10 +164,13 @@ useradd hcops
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-consul.sh -o /tmp/install-consul.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-vault.sh -o /tmp/install-vault.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-nomad.sh -o /tmp/install-nomad.sh
+curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/acl-bootstrap-nomad.sh -o /tmp/acl-bootstrap-nomad.sh
 
 bash /tmp/install-vault.sh
 bash /tmp/install-consul.sh
 bash /tmp/install-nomad.sh
+
+chmod +x /tmp/acl-bootstrap-nomad.sh
 
 # Anaconda is writing an /etc/resolv.conf from the install environment.
 # The system should start out with an empty file.
