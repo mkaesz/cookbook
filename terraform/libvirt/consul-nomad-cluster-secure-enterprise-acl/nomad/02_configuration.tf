@@ -5,9 +5,7 @@ provider "consul" {
 }
 
 resource "time_sleep" "wait_20_seconds" {
-#  depends_on = [libvirt_domain.nomad_server]
-
-  create_duration = "40s"
+  create_duration = "50s"
 }
 
 resource "consul_acl_policy" "consul_client_policy" {
@@ -22,7 +20,9 @@ resource "consul_acl_policy" "consul_client_policy" {
     }
     RULE
   count = var.cluster_size
-  depends_on = [time_sleep.wait_20_seconds]
+  depends_on = [
+    time_sleep.wait_20_seconds, 
+  ]
 }
 
 resource "consul_acl_policy" "nomad_server_policy" {
@@ -47,8 +47,21 @@ resource "consul_acl_policy" "nomad_server_policy" {
     RULE
   count = var.cluster_size
   depends_on = [
-    time_sleep.wait_20_seconds,
+   time_sleep.wait_20_seconds,
   ]
+
+  provisioner "remote-exec" {
+   inline = [
+       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token[count.index].result} -description '${self.name}' 2>&1",
+     ]
+
+ connection {
+   type = "ssh"
+   user = "mkaesz"
+   host = "dc1-bastion.msk.local"
+   private_key = file("~/.ssh/id_rsa")
+ }
+}
 }
 
 resource "consul_acl_policy" "nomad_worker_policy" {
@@ -72,7 +85,7 @@ resource "consul_acl_policy" "nomad_worker_policy" {
     }
     RULE
   count = var.workers
-  depends_on = [
+ depends_on = [
     time_sleep.wait_20_seconds,
   ]
 }

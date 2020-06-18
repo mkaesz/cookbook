@@ -7,7 +7,7 @@ provider "consul" {
 resource "time_sleep" "wait_20_seconds" {
   depends_on = [libvirt_domain.consul_server]
 
-  create_duration = "30s"
+  create_duration = "40s"
 }
 
 resource "consul_license" "license" {

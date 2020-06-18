@@ -8,6 +8,11 @@ variable "nomad_cluster_size" {
   default = 3
 }
 
+variable "nomad_workers" {
+  description = "The number of nomad workers."
+  default = 3
+}
+
 variable "datacenter" {
   description = "The datacenter."
   default = "dc1"

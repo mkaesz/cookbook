@@ -3,7 +3,7 @@ variable "cluster_size" {
 }
 
 variable "workers" {
-  default = 4
+  default = 6
 }
 
 variable "datacenter" {

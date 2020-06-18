@@ -166,19 +166,8 @@ sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name}
 EOT  
 }
-  provisioner "remote-exec" {
-   inline = [
-       "consul acl token create -policy-name ${self.name} -secret ${random_uuid.consul_default_token[count.index].result} -description '${self.name}'",
-     ]
 
- connection {
-   type = "ssh"
-   user = "mkaesz"
-   host = "dc1-bastion.msk.local"
-   private_key = file("~/.ssh/id_rsa")
- }
-}
-  depends_on = [
-    consul_acl_policy.nomad_server_policy,
-  ]
+depends_on = [
+  consul_acl_policy.nomad_worker_policy
+]
 }
