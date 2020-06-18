@@ -158,6 +158,7 @@ EOT
   provisioner "local-exec" {
     when = destroy 
     command = <<EOT
+sleep 5
 sudo podman pull quay.io/coreos/etcd > /dev/null 2>&1
 sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns/local/msk/${self.name} > /dev/null 2>&1
 EOT  
