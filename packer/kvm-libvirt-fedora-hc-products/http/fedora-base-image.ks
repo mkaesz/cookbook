@@ -17,13 +17,12 @@ zerombr
 clearpart --all
 autopart --noboot --nohome --noswap --nolvm
 
-
 repo --name=rawhide --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=rawhide&arch=$basearch
 url --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=rawhide&arch=$basearch
 
 shutdown
 
-bootloader --timeout=1 --append="no_timer_check console=tty1 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0"
+bootloader --timeout=1 --append="no_timer_check console=tty1 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0"
 
 %packages
 kernel-core
@@ -43,7 +42,7 @@ dnf-yum
 rsync
 qemu-guest-agent
 fuse-sshfs
-podman-docker
+docker
 -dracut-config-rescue
 -biosdevname
 -iprutils
@@ -63,7 +62,7 @@ echo "Removing linux-firmware package."
 rpm -e linux-firmware
  
 echo "Removing firewalld."
-dnf -C -y erase "firewalld*"
+#dnf -C -y erase "firewalld*"
  
 # Another one needed at install time but not after that, and it pulls
 # in some unneeded deps (like, newt and slang)
@@ -160,6 +159,7 @@ rm -f /etc/machine-id
 touch /etc/machine-id
 
 useradd hcops
+usermod -G docker -a hcops
 
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-consul.sh -o /tmp/install-consul.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-vault.sh -o /tmp/install-vault.sh
