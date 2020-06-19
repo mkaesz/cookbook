@@ -72,8 +72,9 @@ EOT
 }  
 
 provisioner "file" {
-   source = "scripts/"
-   destination = "/home/mkaesz"
+   source = "${path.module}/scripts/nomad-bootstrap.sh"
+   destination = "/home/mkaesz/nomad-bootstrap.sh"
+
    connection {
       type = "ssh"
       user = "mkaesz"

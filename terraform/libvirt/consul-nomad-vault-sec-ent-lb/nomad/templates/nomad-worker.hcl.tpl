@@ -47,7 +47,7 @@ telemetry {
 consul {
   address = "127.0.0.1:8501"
   auto_advertise = true
-  server_service_name = "${datacenter}-nomad-cluster
+  server_service_name = "${datacenter}-nomad-cluster"
   client_service_name = "${datacenter}-nomad-cluster-worker"
   client_http_check_name = "Nomad Worker HTTP Check"
   client_auto_join = true
