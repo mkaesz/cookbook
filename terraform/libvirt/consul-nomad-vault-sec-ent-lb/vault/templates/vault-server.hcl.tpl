@@ -35,6 +35,6 @@ listener "tcp" {
 ui=true
 log_level = "INFO"
 pid_file = "/opt/vault/data/vault.pid"
-cluster_name = "${datacenter}-vault"
+cluster_name = "${datacenter}-vault-cluster"
 api_addr="https://${node_name}:8200"
 cluster_addr="https://${node_name}:8201"
