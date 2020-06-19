@@ -64,6 +64,7 @@ write_files:
      NOMAD_CLIENT_CERT=/opt/vault/config/${hostname}.crt
      VAULT_CLIENT_KEY=/opt/consul/config/${hostname}.key
      NOMAD_CLIENT_KEY=/opt/vault/config/${hostname}.key
+     VAULT_MODE=${vault_mode}
 runcmd:
   - [ systemctl, enable, consul ]
   - [ systemctl, enable, vault ]

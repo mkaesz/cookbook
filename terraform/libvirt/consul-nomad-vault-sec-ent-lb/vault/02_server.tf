@@ -116,6 +116,7 @@ data "template_file" "user_data_vault_server" {
     vault_cert_file  = base64encode(tls_locally_signed_cert.vault_server[count.index].cert_pem)
     consul_key_file  = base64encode(var.consul_private_key_pem)
     vault_key_file   = base64encode(tls_private_key.vault.private_key_pem)
+    vault_mode       = "server"
   }
   count	= var.cluster_size
 }
