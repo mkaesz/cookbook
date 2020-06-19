@@ -161,16 +161,13 @@ touch /etc/machine-id
 useradd hcops
 usermod -G docker -a hcops
 
-curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-consul.sh -o /tmp/install-consul.sh
-curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-vault.sh -o /tmp/install-vault.sh
-curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/install-nomad.sh -o /tmp/install-nomad.sh
-curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/acl-bootstrap-nomad.sh -o /tmp/acl-bootstrap-nomad.sh
+curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/consul-install.sh -o /tmp/consul-install.sh
+curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/vault-install.sh -o /tmp/vault-install.sh
+curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/nomad-install.sh -o /tmp/nomad-install.sh
 
-bash /tmp/install-vault.sh
-bash /tmp/install-consul.sh
-bash /tmp/install-nomad.sh
-
-chmod +x /tmp/acl-bootstrap-nomad.sh
+bash /tmp/vault-install.sh
+bash /tmp/consul-install.sh
+bash /tmp/nomad-install.sh
 
 wget https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info
 sudo tic -xe alacritty,alacritty-direct alacritty.info
