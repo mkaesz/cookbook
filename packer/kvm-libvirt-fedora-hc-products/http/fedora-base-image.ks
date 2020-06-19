@@ -3,7 +3,7 @@ text
 lang en_US.UTF-8
 keyboard de
 timezone Europe/Berlin --isUtc
-selinux --enforcing
+selinux --disabled
 
 skipx
 rootpw --lock --iscrypted locked
@@ -34,7 +34,8 @@ nfs-utils
 libnfs-utils
 portmap
 wget
-neovim
+vim
+haproxy
 openssh-clients
 unzip
 which
@@ -42,7 +43,7 @@ dnf-yum
 rsync
 qemu-guest-agent
 fuse-sshfs
-#podman-docker
+podman-docker
 -dracut-config-rescue
 -biosdevname
 -iprutils
@@ -51,8 +52,8 @@ fuse-sshfs
 -plymouth
 %end
 
-%post --erroronfail
- 
+%post --erroronfail --interpreter=/bin/bash
+{ 
 echo -n "Setting default runlevel to multiuser text mode"
 rm -f /etc/systemd/system/default.target
 ln -s /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
@@ -68,7 +69,6 @@ dnf -C -y erase "firewalld*"
 # in some unneeded deps (like, newt and slang)
 echo "Removing authconfig."
 dnf -C -y erase authconfig
- 
 # instlang hack. (Note! See bug referenced above package list)
 find /usr/share/locale -mindepth  1 -maxdepth 1 -type d -not -name en_US -exec rm -rf {} +
 localedef --list-archive | grep -v ^en_US | xargs localedef --delete-from-archive
@@ -138,7 +138,7 @@ basearch=$(uname -i)
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch
  
 # that don't support selinux will give us errors
-/usr/sbin/fixfiles -R -a restore || true
+# /usr/sbin/fixfiles -R -a restore || true
  
 echo "Zeroing out empty space."
 # This forces the filesystem to reclaim space from deleted files
@@ -172,6 +172,9 @@ bash /tmp/install-nomad.sh
 
 chmod +x /tmp/acl-bootstrap-nomad.sh
 
+wget https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info
+sudo tic -xe alacritty,alacritty-direct alacritty.info
+
 # Anaconda is writing an /etc/resolv.conf from the install environment.
 # The system should start out with an empty file.
 truncate -s 0 /etc/resolv.conf
@@ -180,4 +183,5 @@ echo "Cleaning history"
 history -c
 
 systemctl enable qemu-guest-agent
+} 2>&1 | tee /root/postinstall.log > /dev/tty3
 %end
