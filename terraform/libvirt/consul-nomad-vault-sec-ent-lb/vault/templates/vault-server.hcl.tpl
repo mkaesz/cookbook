@@ -1,7 +1,7 @@
 storage "consul" {
   address = "127.0.0.1:8501"
   scheme = "https"
-  service = "${datacenter}-vault"
+  service = "${datacenter}-vault-cluster"
   path = "vault/"
   token      = "${consul_default_token}"
   tls_ca_file = "/opt/consul/config/consul-ca.pem"
@@ -12,7 +12,7 @@ storage "consul" {
 service_registration "consul" {
   scheme        = "https"
   address = "127.0.0.1:8501"
-  service = "${datacenter}-vault-server"
+  service = "${datacenter}-vault-cluster"
   tls_ca_file = "/opt/consul/config/consul-ca.pem"
   tls_cert_file = "/opt/consul/config/${node_name}.crt"
   tls_key_file = "/opt/consul/config/${node_name}.key"
