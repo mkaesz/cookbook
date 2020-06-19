@@ -26,7 +26,7 @@ After=network-online.target
 
 [Service]
 ExecReload=/bin/kill --signal HUP \$MAINPID
-ExecStart=/usr/local/bin/vault agent -config /opt/vault/config/config.hcl
+ExecStart=/usr/local/bin/vault server -config /opt/vault/config/config.hcl
 KillMode=process
 AmbientCapabilities=CAP_IPC_LOCK
 Capabilities=CAP_IPC_LOCK+ep
