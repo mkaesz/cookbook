@@ -86,7 +86,7 @@ resource "tls_locally_signed_cert" "vault_server" {
 data "template_file" "consul_client_config" {
   template = "${file("${path.module}/templates/consul-client.json.tpl")}"
   vars = {
-    node_name = "${var.datacenter}-server-vault-${count.index}"
+    node_name = "${var.datacenter}-server-vault-${count.index}.${var.domain}"
     consul_cluster_nodes = jsonencode(values(var.consul_cluster_servers))
     gossip_password = base64encode(var.consul_gossip_password)
     datacenter = var.datacenter
@@ -98,7 +98,7 @@ data "template_file" "consul_client_config" {
 data "template_file" "vault_server_config" {
   template = "${file("${path.module}/templates/vault-server.hcl.tpl")}"
   vars = {
-    node_name        = "${var.datacenter}-server-vault-${count.index}"
+    node_name        = "${var.datacenter}-server-vault-${count.index}.${var.domain}"
     datacenter       = var.datacenter
     consul_default_token = random_uuid.consul_default_token[count.index].result
   }

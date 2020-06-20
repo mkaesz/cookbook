@@ -3,6 +3,7 @@ variable "cluster_size" {
   default = 3
 }
 
+variable "consul_server" {}
 variable "datacenter" {}
 
 variable "os_image" {}

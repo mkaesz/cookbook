@@ -56,14 +56,14 @@ write_files:
  - path: /etc/environment
    permissions: 0644
    content: |
-     VAULT_ADDR=https://dc1-server-consul-0:8501
-     NOMAD_ADDR=https://dc1-server-vault-0:4646
-     VAULT_CACERT=/opt/consul/config/consul-ca.pem
-     NOMAD_CACERT=/opt/vault/config/vault-ca.pem
-     VAULT_CLIENT_CERT=/opt/consul/config/${hostname}.crt
-     NOMAD_CLIENT_CERT=/opt/vault/config/${hostname}.crt
-     VAULT_CLIENT_KEY=/opt/consul/config/${hostname}.key
-     NOMAD_CLIENT_KEY=/opt/vault/config/${hostname}.key
+     VAULT_ADDR=https://dc1-server-vault-0:8501
+     CONSUL_HTTP_ADDR=https://dc1-server-consul-0:4646
+     VAULT_CACERT=/opt/vault/config/vault-ca.pem
+     CONSUL_CACERT=/opt/consul/config/consul-ca.pem
+     VAULT_CLIENT_CERT=/opt/vault/config/${hostname}.crt
+     CONSUL_CLIENT_CERT=/opt/consul/config/${hostname}.crt
+     VAULT_CLIENT_KEY=/opt/vault/config/${hostname}.key
+     CONSUL_CLIENT_KEY=/opt/consul/config/${hostname}.key
      VAULT_MODE=${vault_mode}
 runcmd:
   - [ systemctl, enable, consul ]

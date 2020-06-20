@@ -1,11 +1,11 @@
-datacenter= "${datacenter}"
-bind_addr="${node_name}"
+datacenter           = "${datacenter}"
+bind_addr            ="${node_name}"
 disable_update_check = true
-enable_syslog = true
-log_level = "INFO"
-log_file = "/opt/nomad/data/"
-name = "${node_name}"
-region = "europe"
+enable_syslog        = true
+log_level            = "INFO"
+log_file             = "/opt/nomad/data/"
+name                 = "${node_name}"
+region               = "europe"
 
 client {
   enabled = true
@@ -24,9 +24,9 @@ tls {
 }
 
 vault {
-  enabled = true
-  address = "https://dc1-server-vault-0.${var.domain}:8200"
-  ca_file = "/opt/vault/config/vault-ca.pem"
+  enabled   = true
+  address   = "https://active.${var.datacenter}-vault-cluster.service.consul:8200"
+  ca_file   = "/opt/vault/config/vault-ca.pem"
   cert_file = "/opt/vault/config/${node_name}.crt"
   key_file  = "/opt/vault/config/${node_name}.key"
 }
@@ -40,10 +40,10 @@ plugin "docker" {
 }
 
 autopilot {
-    cleanup_dead_servers = true
-    enable_redundancy_zones = false
+    cleanup_dead_servers      = true
+    enable_redundancy_zones   = false
     disable_upgrade_migration = false
-    enable_custom_upgrades = false
+    enable_custom_upgrades    = false
 }
 
 telemetry {
@@ -53,14 +53,14 @@ telemetry {
 }
 
 consul {
-  address = "127.0.0.1:8501"
-  auto_advertise = true
-  server_service_name = "${datacenter}-nomad-cluster"
-  client_service_name = "${datacenter}-nomad-cluster-worker"
+  address                = "127.0.0.1:8501"
+  auto_advertise         = true
+  server_service_name    = "${datacenter}-nomad-cluster"
+  client_service_name    = "${datacenter}-nomad-cluster-worker"
   client_http_check_name = "Nomad Worker HTTP Check"
-  client_auto_join = true
-  ssl = true
-  ca_file = "/opt/consul/config/consul-ca.pem"
-  cert_file = "/opt/consul/config/${node_name}.crt"
-  key_file  = "/opt/consul/config/${node_name}.key"
+  client_auto_join       = true
+  ssl                    = true
+  ca_file                = "/opt/consul/config/consul-ca.pem"
+  cert_file              = "/opt/consul/config/${node_name}.crt"
+  key_file               = "/opt/consul/config/${node_name}.key"
 }

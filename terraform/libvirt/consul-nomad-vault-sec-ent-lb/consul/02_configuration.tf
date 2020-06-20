@@ -1,5 +1,5 @@
 provider "consul" {
-  address    = "${var.datacenter}-server-consul-0.${var.domain}"
+  address    = var.consul_server 
   datacenter = var.datacenter
   token      = random_uuid.consul_master_token.result
 }

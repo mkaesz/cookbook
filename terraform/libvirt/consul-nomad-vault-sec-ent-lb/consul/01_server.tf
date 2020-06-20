@@ -99,7 +99,7 @@ resource "tls_locally_signed_cert" "consul_server" {
 data "template_file" "consul_server_config" {
   template = "${file("${path.module}/templates/consul-server.json.tpl")}"
   vars = {
-    node_name            = "${var.datacenter}-server-consul-${count.index}"
+    node_name            = "${var.datacenter}-server-consul-${count.index}.${var.domain}"
     cluster_size         = var.cluster_size
     consul_cluster_nodes = jsonencode(values(local.consul_cluster_servers_expanded))
     gossip_password      = base64encode(random_string.consul_gossip_password.result)
@@ -117,6 +117,7 @@ data "template_file" "user_data_consul_server" {
     ca_file       = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
     cert_file     = base64encode(tls_locally_signed_cert.consul_server[count.index].cert_pem)
     key_file      = base64encode(tls_private_key.consul.private_key_pem)
+    domain        = var.domain
   }
   count	= var.cluster_size
 }

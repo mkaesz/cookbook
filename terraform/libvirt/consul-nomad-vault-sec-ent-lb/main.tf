@@ -26,6 +26,7 @@ module "consul_cluster" {
   datacenter                       = var.datacenter
   domain                           = var.domain
   os_image                         = var.os_image
+  consul_server                    = "dc1-server-consul-0.msk.local:8500"
 }
 
 module "vault_cluster" {
@@ -34,7 +35,7 @@ module "vault_cluster" {
   datacenter                       = var.datacenter
   domain                           = var.domain
   os_image                         = var.os_image
-  consul_server                    = module.consul_cluster.consul_server_0
+  consul_server                    = "dc1-server-consul-0.msk.local:8500"
   consul_gossip_password           = module.consul_cluster.consul_gossip_password 
   consul_master_token              = module.consul_cluster.consul_master_token
   consul_cluster_servers           = module.consul_cluster.consul_cluster_servers
@@ -49,7 +50,7 @@ module "nomad_cluster" {
   datacenter                       = var.datacenter
   domain                           = var.domain
   os_image                         = var.os_image
-  consul_server                    = module.consul_cluster.consul_server_0
+  consul_server                    = "dc1-server-consul-0.msk.local:8500"
   consul_gossip_password           = module.consul_cluster.consul_gossip_password 
   consul_master_token              = module.consul_cluster.consul_master_token
   consul_cluster_servers           = module.consul_cluster.consul_cluster_servers

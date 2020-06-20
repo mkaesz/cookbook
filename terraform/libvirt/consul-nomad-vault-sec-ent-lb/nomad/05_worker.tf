@@ -11,6 +11,7 @@ resource "tls_cert_request" "consul_client_worker" {
   dns_names = [
     "${var.datacenter}-client-consul-${count.index}",
     "${var.datacenter}-worker-nomad-${count.index}",
+    "${var.datacenter}-worker-nomad-${count.index}.${var.domain}",
     "client.${var.datacenter}.consul",
     "localhost"
   ]
@@ -20,7 +21,7 @@ resource "tls_cert_request" "consul_client_worker" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-client-consul-${count.index}"
+    common_name  = "${var.datacenter}-client-consul-${count.index}.${var.domain}"
     organization = "msk"
   }
   count = var.workers
@@ -51,6 +52,7 @@ resource "tls_cert_request" "vault_client_worker" {
   dns_names = [
     "${var.datacenter}-client-vault-${count.index}",
     "${var.datacenter}-worker-nomad-${count.index}",
+    "${var.datacenter}-worker-nomad-${count.index}${var.domain}",
     "client.${var.datacenter}.consul",
     "localhost"
   ]
@@ -60,7 +62,7 @@ resource "tls_cert_request" "vault_client_worker" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-client-vault-${count.index}"
+    common_name  = "${var.datacenter}-client-vault-${count.index}.${var.domain}"
     organization = "msk"
   }
   count = var.workers
@@ -90,6 +92,7 @@ resource "tls_cert_request" "nomad_worker" {
 
   dns_names = [
     "${var.datacenter}-worker-nomad-${count.index}",
+    "${var.datacenter}-worker-nomad-${count.index}.${var.domain}",
     "server.${var.datacenter}.nomad",
     "server.global.nomad",
     "server.europe.nomad",
@@ -98,7 +101,7 @@ resource "tls_cert_request" "nomad_worker" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-worker-nomad-${count.index}"
+    common_name  = "${var.datacenter}-worker-nomad-${count.index}.${var.domain}"
     organization = "msk"
   }
   count = var.workers
@@ -129,7 +132,7 @@ resource "random_uuid" "consul_default_token_worker" {
 data "template_file" "consul_client_worker_config" {
   template = "${file("${path.module}/templates/consul-client.json.tpl")}"
   vars = {
-    node_name = "${var.datacenter}-worker-nomad-${count.index}"
+    node_name = "${var.datacenter}-worker-nomad-${count.index}.${var.domain}"
     consul_cluster_nodes = jsonencode(values(var.consul_cluster_servers))
     gossip_password = base64encode(var.consul_gossip_password)
     datacenter = var.datacenter
@@ -141,8 +144,9 @@ data "template_file" "consul_client_worker_config" {
 data "template_file" "nomad_worker_config" {
   template = "${file("${path.module}/templates/nomad-worker.hcl.tpl")}"
   vars = {
-    node_name        = "${var.datacenter}-worker-nomad-${count.index}"
+    node_name        = "${var.datacenter}-worker-nomad-${count.index}.${var.domain}"
     datacenter       = var.datacenter
+    domain           = var.domain
   }
   count = var.workers
 }
@@ -150,7 +154,7 @@ data "template_file" "nomad_worker_config" {
 data "template_file" "user_data_nomad_worker" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname = "${var.datacenter}-worker-nomad-${count.index}"
+    hostname = "${var.datacenter}-worker-nomad-${count.index}.${var.domain}"
     consul_config    = base64encode(data.template_file.consul_client_worker_config[count.index].rendered)
     nomad_config     = base64encode(data.template_file.nomad_worker_config[count.index].rendered)
     consul_ca_file   = base64encode(var.consul_ca_cert_pem)

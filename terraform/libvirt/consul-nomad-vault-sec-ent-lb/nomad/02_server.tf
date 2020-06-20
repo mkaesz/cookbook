@@ -20,7 +20,7 @@ resource "tls_cert_request" "consul_client" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-client-consul-${count.index}"
+    common_name  = "${var.datacenter}-client-consul-${count.index}.${var.domain}"
     organization = "msk"
   }
   count = var.cluster_size
@@ -51,6 +51,7 @@ resource "tls_cert_request" "vault_client" {
   dns_names = [
     "${var.datacenter}-client-vault-${count.index}",
     "${var.datacenter}-server-nomad-${count.index}",
+    "${var.datacenter}-server-nomad-${count.index}.${var.domain}",
     "client.${var.datacenter}.consul",
     "localhost"
   ]
@@ -60,7 +61,7 @@ resource "tls_cert_request" "vault_client" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-client-vault-${count.index}"
+    common_name  = "${var.datacenter}-client-vault-${count.index}.${var.domain}"
     organization = "msk"
   }
   count = var.cluster_size
@@ -90,6 +91,7 @@ resource "tls_cert_request" "nomad_server" {
 
   dns_names = [
     "${var.datacenter}-server-nomad-${count.index}",
+    "${var.datacenter}-server-nomad-${count.index}.${var.domain}",
     "server.${var.datacenter}.nomad",
     "server.global.nomad",
     "server.europe.nomad",
@@ -98,7 +100,7 @@ resource "tls_cert_request" "nomad_server" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-server-nomad-${count.index}"
+    common_name  = "${var.datacenter}-server-nomad-${count.index}.${var.domain}"
     organization = "msk"
   }
   count = var.cluster_size
@@ -125,7 +127,7 @@ resource "tls_locally_signed_cert" "nomad_server" {
 data "template_file" "consul_client_config" {
   template = "${file("${path.module}/templates/consul-client.json.tpl")}"
   vars = {
-    node_name = "${var.datacenter}-server-nomad-${count.index}"
+    node_name = "${var.datacenter}-server-nomad-${count.index}.${var.domain}"
     consul_cluster_nodes = jsonencode(values(var.consul_cluster_servers))
     gossip_password = base64encode(var.consul_gossip_password)
     datacenter = var.datacenter
@@ -138,10 +140,11 @@ data "template_file" "nomad_server_config" {
   template = "${file("${path.module}/templates/nomad-server.hcl.tpl")}"
   vars = {
     cluster_size             = var.cluster_size
-    node_name                = "${var.datacenter}-server-nomad-${count.index}"
+    node_name                = "${var.datacenter}-server-nomad-${count.index}.${var.domain}"
     datacenter               = var.datacenter
     gossip_password          = base64encode(random_string.nomad_gossip_password.result)
     vault_nomad_server_token = "f02f01c2-c0d1-7cb7-6b88-8a14fada58c0"
+    domain                   = var.domain
   }
   count = var.cluster_size
 }
@@ -149,7 +152,7 @@ data "template_file" "nomad_server_config" {
 data "template_file" "user_data_nomad_server" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname         = "${var.datacenter}-server-nomad-${count.index}"
+    hostname         = "${var.datacenter}-server-nomad-${count.index}.${var.domain}"
     consul_config    = base64encode(data.template_file.consul_client_config[count.index].rendered)
     nomad_config     = base64encode(data.template_file.nomad_server_config[count.index].rendered)
     consul_ca_file   = base64encode(var.consul_ca_cert_pem)
