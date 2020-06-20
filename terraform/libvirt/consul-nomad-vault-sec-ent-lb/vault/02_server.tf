@@ -10,7 +10,7 @@ resource "tls_cert_request" "consul_client" {
 
   dns_names = [
     "${var.datacenter}-client-consul-${count.index}",
-    "${var.datacenter}-server-vault-${count.index}",
+    "${var.datacenter}-server-vault-${count.index}.${var.domain}",
     "client.${var.datacenter}.consul",
     "localhost"
   ]
@@ -20,8 +20,8 @@ resource "tls_cert_request" "consul_client" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-client-consul-${count.index}"
-    organization = "mskmania"
+    common_name  = "${var.datacenter}-client-consul-${count.index}.${var.domain}"
+    organization = "msk"
   }
   count = var.cluster_size
 }
@@ -50,7 +50,7 @@ resource "tls_cert_request" "vault_server" {
 
   dns_names = [
     "${var.datacenter}-server-vault-${count.index}",
-    "${var.datacenter}-server-vault-${count.index}.msk.local",
+    "${var.datacenter}-server-vault-${count.index}.${var.domain}",
     "server.${var.datacenter}.vault",
     "server.global.vault",
     "server.europe.vault",
@@ -59,8 +59,8 @@ resource "tls_cert_request" "vault_server" {
   ]
 
   subject {
-    common_name  = "${var.datacenter}-server-vault-${count.index}"
-    organization = "mskmania"
+    common_name  = "${var.datacenter}-server-vault-${count.index}.${var.domain}"
+    organization = "msk"
   }
   count = var.cluster_size
 }
@@ -108,7 +108,7 @@ data "template_file" "vault_server_config" {
 data "template_file" "user_data_vault_server" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname         = "${var.datacenter}-server-vault-${count.index}"
+    hostname         = "${var.datacenter}-server-vault-${count.index}.${var.domain}"
     consul_config    = base64encode(data.template_file.consul_client_config[count.index].rendered)
     vault_config     = base64encode(data.template_file.vault_server_config[count.index].rendered)
     consul_ca_file   = base64encode(var.consul_ca_cert_pem)

@@ -17,7 +17,8 @@ resource "libvirt_volume" "volume" {
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname = "${var.datacenter}-bastion"
+    hostname            = "${var.datacenter}-bastion.${var.domain}"
+    domain              = var.domain
     consul_ca_file      = base64encode(var.consul_ca_cert_pem)
     vault_ca_file       = base64encode(var.vault_ca_cert_pem)
     nomad_ca_file       = base64encode(var.nomad_ca_cert_pem)
@@ -78,7 +79,7 @@ provisioner "file" {
    connection {
       type = "ssh"
       user = "mkaesz"
-      host = "dc1-bastion.msk.local"
+      host = "dc1-bastion.${var.domain}"
       private_key = file("~/.ssh/id_rsa")
    }
   }

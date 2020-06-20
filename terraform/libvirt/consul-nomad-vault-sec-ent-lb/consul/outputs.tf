@@ -29,7 +29,3 @@ output "consul_private_key_algorithm" {
 output "consul_private_key_pem" {
   value = tls_private_key.consul_ca.private_key_pem
 }
-
-output "consul_server_0" {
-  value = "dc1-server-consul-0.msk.local:8500"
-}

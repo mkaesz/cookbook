@@ -1,5 +1,6 @@
 provider "consul" {
   address    = var.consul_server
+  #address    = "https://dc1-server-consul-0.${var.domain}:8501"
   datacenter = var.datacenter
   token      = var.consul_master_token
 }
@@ -62,7 +63,7 @@ resource "consul_acl_policy" "vault_server_policy" {
  connection {
    type = "ssh"
    user = "mkaesz"
-   host = "dc1-bastion.msk.local"
+   host = "dc1-bastion.${var.domain}"
    private_key = file("~/.ssh/id_rsa")
  }
 }

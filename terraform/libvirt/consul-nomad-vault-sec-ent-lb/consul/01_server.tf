@@ -11,7 +11,7 @@ resource "libvirt_pool" "consul" {
 
 locals {
   consul_cluster_servers_expanded = {
-    for i in range(0, var.cluster_size):i => format("%s%s%d%s", var.datacenter, "-server-consul-", i, ".msk.local")
+    for i in range(0, var.cluster_size):i => format("%s%s%d%s", var.datacenter, "-server-consul-", i, ".${var.domain}")
   }
 }
 
@@ -25,8 +25,8 @@ resource "tls_self_signed_cert" "consul_ca" {
   private_key_pem = tls_private_key.consul_ca.private_key_pem
 
   subject {
-    common_name  = "consul.msk.local"
-    organization = "mskmania"
+    common_name  = "consul.${var.domain}"
+    organization = "msk"
   }
 
   validity_period_hours = 8760
@@ -63,14 +63,15 @@ resource "tls_cert_request" "consul_server" {
 
   dns_names = [
     "${var.datacenter}-server-consul-${count.index}",
+    "${var.datacenter}-server-consul-${count.index}.${var.domain}",
     "server.${var.datacenter}.consul",
     "localhost",
     "127.0.0.1",
   ]
 
   subject {
-    common_name  = "${var.datacenter}-server-consul-${count.index}"
-    organization = "mskmania"
+    common_name  = "${var.datacenter}-server-consul-${count.index}.${var.domain}"
+    organization = "msk"
   }
 
   count = var.cluster_size
@@ -111,7 +112,7 @@ data "template_file" "consul_server_config" {
 data "template_file" "user_data_consul_server" {
   template = "${file("${path.module}/templates/cloud_init.cfg.tpl")}"
   vars = {
-    hostname      = "${var.datacenter}-server-consul-${count.index}"
+    hostname      = "${var.datacenter}-server-consul-${count.index}.${var.domain}"
     consul_config = base64encode(data.template_file.consul_server_config[count.index].rendered)
     ca_file       = base64encode(tls_self_signed_cert.consul_ca.cert_pem)
     cert_file     = base64encode(tls_locally_signed_cert.consul_server[count.index].cert_pem)

@@ -11,7 +11,7 @@ resource "tls_cert_request" "consul_cli" {
 
   subject {
     common_name  = "${var.datacenter}-bastion"
-    organization = "mskmania"
+    organization = "msk"
   }
 }
 

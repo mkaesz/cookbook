@@ -17,3 +17,11 @@ variable "datacenter" {
   description = "The datacenter."
   default = "dc1"
 }
+
+variable "domain" {
+  default = "msk.local"
+}
+
+variable "os_image" {
+  default = "http://192.168.0.171:8088/workspace/images/fedora32-kvm-hc-products-cloudinit.qcow2"
+}

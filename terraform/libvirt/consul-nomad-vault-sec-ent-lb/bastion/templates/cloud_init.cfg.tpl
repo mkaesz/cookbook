@@ -62,9 +62,9 @@ write_files:
  - path: /etc/environment
    permissions: 0644
    content: |
-     CONSUL_HTTP_ADDR=https://dc1-server-consul-0:8501
-     VAULT_ADDR=https://dc1-server-vault-0:8200
-     NOMAD_ADDR=https://dc1-server-nomad-0:4646
+     CONSUL_HTTP_ADDR=https://dc1-server-consul-0.${domain}:8501
+     VAULT_ADDR=https://dc1-server-vault-0.${domain}:8200
+     NOMAD_ADDR=https://dc1-server-nomad-0.${domain}:4646
      CONSUL_CACERT=/opt/consul/config/consul-ca.pem
      VAULT_CACERT=/opt/vault/config/vault-ca.pem
      NOMAD_CACERT=/opt/nomad/config/nomad-ca.pem

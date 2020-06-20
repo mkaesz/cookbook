@@ -58,7 +58,7 @@ resource "consul_acl_policy" "nomad_server_policy" {
  connection {
    type = "ssh"
    user = "mkaesz"
-   host = "dc1-bastion.msk.local"
+   host = "dc1-bastion.${var.domain}"
    private_key = file("~/.ssh/id_rsa")
  }
 }
@@ -94,7 +94,7 @@ resource "consul_acl_policy" "nomad_worker_policy" {
    connection {
       type = "ssh"
       user = "mkaesz"
-      host = "dc1-bastion.msk.local"
+      host = "dc1-bastion.${var.domain}"
       private_key = file("~/.ssh/id_rsa")
    }
   }

@@ -21,7 +21,7 @@ resource "tls_cert_request" "consul_client" {
 
   subject {
     common_name  = "${var.datacenter}-client-consul-${count.index}"
-    organization = "mskmania"
+    organization = "msk"
   }
   count = var.cluster_size
 }
@@ -61,7 +61,7 @@ resource "tls_cert_request" "vault_client" {
 
   subject {
     common_name  = "${var.datacenter}-client-vault-${count.index}"
-    organization = "mskmania"
+    organization = "msk"
   }
   count = var.cluster_size
 }
@@ -99,7 +99,7 @@ resource "tls_cert_request" "nomad_server" {
 
   subject {
     common_name  = "${var.datacenter}-server-nomad-${count.index}"
-    organization = "mskmania"
+    organization = "msk"
   }
   count = var.cluster_size
 }

@@ -3,15 +3,15 @@ resource "tls_cert_request" "vault_cli" {
   private_key_pem = tls_private_key.vault.private_key_pem
 
   dns_names = [
-    "${var.datacenter}-bastion",
+    "${var.datacenter}-bastion.${var.domain}",
     "server.${var.datacenter}.vault",
     "localhost",
     "127.0.0.1",
   ]
 
   subject {
-    common_name  = "${var.datacenter}-bastion"
-    organization = "mskmania"
+    common_name  = "${var.datacenter}-bastion.${var.domain}"
+    organization = "msk"
   }
 }
 

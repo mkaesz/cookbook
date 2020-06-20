@@ -21,7 +21,7 @@ resource "tls_cert_request" "consul_client_worker" {
 
   subject {
     common_name  = "${var.datacenter}-client-consul-${count.index}"
-    organization = "mskmania"
+    organization = "msk"
   }
   count = var.workers
 }
@@ -61,7 +61,7 @@ resource "tls_cert_request" "vault_client_worker" {
 
   subject {
     common_name  = "${var.datacenter}-client-vault-${count.index}"
-    organization = "mskmania"
+    organization = "msk"
   }
   count = var.workers
 }
@@ -99,7 +99,7 @@ resource "tls_cert_request" "nomad_worker" {
 
   subject {
     common_name  = "${var.datacenter}-worker-nomad-${count.index}"
-    organization = "mskmania"
+    organization = "msk"
   }
   count = var.workers
 }

@@ -19,8 +19,8 @@ resource "tls_self_signed_cert" "vault_ca" {
   private_key_pem = tls_private_key.vault_ca.private_key_pem
 
   subject {
-    common_name  = "vault.msk.local"
-    organization = "mskmania"
+    common_name  = "vault.${var.domain}"
+    organization = "msk"
   }
 
   validity_period_hours = 8760

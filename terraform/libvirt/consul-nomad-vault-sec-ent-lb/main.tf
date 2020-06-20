@@ -1,33 +1,39 @@
 provider "libvirt" {
-  uri   = "qemu+ssh://root@192.168.0.171/system"
+  uri                              = "qemu+ssh://root@192.168.0.171/system"
 }
 
 module "bastion" {
-  source = "./bastion"
+  source                           = "./bastion"
 
-  datacenter = var.datacenter
-  consul_ca_cert_pem         = module.consul_cluster.consul_ca_cert_pem
-  vault_ca_cert_pem          = module.vault_cluster.vault_ca_cert_pem
-  nomad_ca_cert_pem          = module.nomad_cluster.nomad_ca_cert_pem
-  consul_cli_private_key_pem = module.consul_cluster.consul_cli_private_key_pem
-  vault_cli_private_key_pem  = module.vault_cluster.vault_cli_private_key_pem
-  nomad_cli_private_key_pem  = module.nomad_cluster.nomad_cli_private_key_pem
-  consul_cli_cert_pem        = module.consul_cluster.consul_cli_cert_pem
-  vault_cli_cert_pem         = module.vault_cluster.vault_cli_cert_pem
-  nomad_cli_cert_pem         = module.nomad_cluster.nomad_cli_cert_pem
-  consul_master_token        = module.consul_cluster.consul_master_token
+  datacenter                       = var.datacenter
+  domain                           = var.domain
+  os_image                         = var.os_image
+  consul_ca_cert_pem               = module.consul_cluster.consul_ca_cert_pem
+  vault_ca_cert_pem                = module.vault_cluster.vault_ca_cert_pem
+  nomad_ca_cert_pem                = module.nomad_cluster.nomad_ca_cert_pem
+  consul_cli_private_key_pem       = module.consul_cluster.consul_cli_private_key_pem
+  vault_cli_private_key_pem        = module.vault_cluster.vault_cli_private_key_pem
+  nomad_cli_private_key_pem        = module.nomad_cluster.nomad_cli_private_key_pem
+  consul_cli_cert_pem              = module.consul_cluster.consul_cli_cert_pem
+  vault_cli_cert_pem               = module.vault_cluster.vault_cli_cert_pem
+  nomad_cli_cert_pem               = module.nomad_cluster.nomad_cli_cert_pem
+  consul_master_token              = module.consul_cluster.consul_master_token
 }
 
 module "consul_cluster" {
-  source = "./consul"
+  source                           = "./consul"
 
-  datacenter    = var.datacenter
+  datacenter                       = var.datacenter
+  domain                           = var.domain
+  os_image                         = var.os_image
 }
 
 module "vault_cluster" {
-  source = "./vault"
+  source                           = "./vault"
 
   datacenter                       = var.datacenter
+  domain                           = var.domain
+  os_image                         = var.os_image
   consul_server                    = module.consul_cluster.consul_server_0
   consul_gossip_password           = module.consul_cluster.consul_gossip_password 
   consul_master_token              = module.consul_cluster.consul_master_token
@@ -38,9 +44,11 @@ module "vault_cluster" {
 }
 
 module "nomad_cluster" {
-  source = "./nomad"
+  source                           = "./nomad"
 
   datacenter                       = var.datacenter
+  domain                           = var.domain
+  os_image                         = var.os_image
   consul_server                    = module.consul_cluster.consul_server_0
   consul_gossip_password           = module.consul_cluster.consul_gossip_password 
   consul_master_token              = module.consul_cluster.consul_master_token
