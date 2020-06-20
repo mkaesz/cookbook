@@ -21,7 +21,7 @@ sudo rm -rf /tmp/nomad.zip
 
 nomad version
 
-sudo mkdir -p /opt/nomad/{config,data}
+sudo mkdir -p /opt/nomad/{config,data,data/plugins}
 
 sudo chown -R hcops:hcops /opt/nomad
 
