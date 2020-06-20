@@ -11,7 +11,7 @@ rootpw --lock --iscrypted locked
 firewall --disabled
 
 network --bootproto=dhcp --device=link --activate --onboot=on
-services --enabled=sshd,cloud-init,cloud-init-local,cloud-config,cloud-final
+services --enabled=sshd,cloud-init,cloud-init-local,cloud-config,cloud-final,dnsmasq,qemu-guest-agent --disabled=systemd-resolved
  
 zerombr
 clearpart --all
@@ -110,20 +110,32 @@ cat > /etc/hosts << EOF
  
 EOF
 echo .
- 
+
+cat > /etc/dnsmasq.d/consul-dns.conf << EOF
+server=/consul/127.0.0.1#8600
+server=192.168.0.171
+
+listen-address=127.0.0.1
+
+no-resolv
+no-poll
+EOF
+
+cat > /etc/NetworkManager/NetworkManager.conf << EOF
+[main]
+plugins = ifcfg-rh,
+dns=none
+EOF
+
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
+
 echo "Disabling tmpfs for /tmp."
 systemctl mask tmp.mount
  
 # make sure firstboot doesn't start
 echo "RUN_FIRSTBOOT=NO" > /etc/sysconfig/firstboot
- 
-# Uncomment this if you want to use cloud init but suppress the creation
-# of an "ec2-user" account. This will, in the absence of further config,
-# cause the ssh key from a metadata source to be put in the root account.
-#cat <<EOF > /etc/cloud/cloud.cfg.d/50_suppress_ec2-user_use_root.cfg
-#users: []
-#disable_root: 0
-#EOF
  
 echo "Removing random-seed so it's not the same in every image."
 rm -f /var/lib/systemd/random-seed
@@ -181,6 +193,5 @@ truncate -s 0 /etc/resolv.conf
 echo "Cleaning history"
 history -c
 
-systemctl enable qemu-guest-agent
 } 2>&1 | tee /root/postinstall.log > /dev/tty3
 %end
