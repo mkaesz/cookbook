@@ -48,4 +48,7 @@ module "nomad_cluster" {
   consul_ca_cert_pem               = module.consul_cluster.consul_ca_cert_pem
   consul_private_key_pem           = module.consul_cluster.consul_private_key_pem 
   consul_private_key_algorithm     = module.consul_cluster.consul_private_key_algorithm
+  vault_ca_cert_pem                = module.vault_cluster.vault_ca_cert_pem
+  vault_private_key_pem            = module.vault_cluster.vault_private_key_pem
+  vault_private_key_algorithm      = module.vault_cluster.vault_private_key_algorithm
 }

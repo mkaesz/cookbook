@@ -31,3 +31,9 @@ variable "consul_ca_cert_pem" {}
 variable "consul_private_key_algorithm" {}
 
 variable "consul_private_key_pem" {}
+
+variable "vault_ca_cert_pem" {}
+
+variable "vault_private_key_algorithm" {}
+
+variable "vault_private_key_pem" {}

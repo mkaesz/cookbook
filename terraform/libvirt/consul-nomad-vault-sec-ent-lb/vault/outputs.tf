@@ -9,3 +9,11 @@ output "vault_cli_cert_pem" {
 output "vault_cli_private_key_pem" {
   value = tls_private_key.vault.private_key_pem
 }
+
+output "vault_private_key_algorithm" {
+  value = tls_private_key.vault_ca.algorithm
+}
+
+output "vault_private_key_pem" {
+  value = tls_private_key.vault_ca.private_key_pem
+}

@@ -44,6 +44,46 @@ resource "tls_locally_signed_cert" "consul_client_worker" {
   count = var.workers
 }
 
+resource "tls_cert_request" "vault_client_worker" {
+  key_algorithm   = var.vault_private_key_algorithm
+  private_key_pem = var.vault_private_key_pem
+
+  dns_names = [
+    "${var.datacenter}-client-vault-${count.index}",
+    "${var.datacenter}-worker-nomad-${count.index}",
+    "client.${var.datacenter}.consul",
+    "localhost"
+  ]
+
+  ip_addresses = [
+    "127.0.0.1"
+  ]
+
+  subject {
+    common_name  = "${var.datacenter}-client-vault-${count.index}"
+    organization = "mskmania"
+  }
+  count = var.workers
+}
+
+resource "tls_locally_signed_cert" "vault_client_worker" {
+  cert_request_pem   = tls_cert_request.vault_client_worker[count.index].cert_request_pem
+  ca_key_algorithm   = var.vault_private_key_algorithm
+  ca_private_key_pem = var.vault_private_key_pem
+  ca_cert_pem        = var.vault_ca_cert_pem
+
+  validity_period_hours = 8760
+
+  allowed_uses = [
+    "cert_signing",
+    "client_auth",
+    "digital_signature",
+    "key_encipherment",
+    "server_auth",
+  ]
+  count = var.workers
+}
+
 resource "tls_cert_request" "nomad_worker" {
   key_algorithm   = tls_private_key.nomad.algorithm
   private_key_pem = tls_private_key.nomad.private_key_pem
@@ -114,10 +154,13 @@ data "template_file" "user_data_nomad_worker" {
     consul_config    = base64encode(data.template_file.consul_client_worker_config[count.index].rendered)
     nomad_config     = base64encode(data.template_file.nomad_worker_config[count.index].rendered)
     consul_ca_file   = base64encode(var.consul_ca_cert_pem)
+    vault_ca_file    = base64encode(var.vault_ca_cert_pem)
     nomad_ca_file    = base64encode(tls_self_signed_cert.nomad_ca.cert_pem)
     consul_cert_file = base64encode(tls_locally_signed_cert.consul_client_worker[count.index].cert_pem)
+    vault_cert_file  = base64encode(tls_locally_signed_cert.vault_client_worker[count.index].cert_pem)
     nomad_cert_file  = base64encode(tls_locally_signed_cert.nomad_worker[count.index].cert_pem)
     consul_key_file  = base64encode(var.consul_private_key_pem)
+    vault_key_file   = base64encode(var.vault_private_key_pem)
     nomad_key_file   = base64encode(tls_private_key.nomad.private_key_pem) 
   }
   count	= var.workers

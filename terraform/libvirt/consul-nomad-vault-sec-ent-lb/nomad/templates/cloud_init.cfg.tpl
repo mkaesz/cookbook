@@ -53,6 +53,21 @@ write_files:
    owner: hcops:hcops
    path: /opt/consul/config/${hostname}.key
    permissions: '0644'
+ - encoding: b64
+   content: ${vault_ca_file}
+   owner: hcops:hcops
+   path: /opt/vault/config/vault-ca.pem
+   permissions: '0644'
+ - encoding: b64
+   content: ${vault_cert_file}
+   owner: hcops:hcops
+   path: /opt/vault/config/${hostname}.crt
+   permissions: '0644'
+ - encoding: b64
+   content: ${vault_key_file}
+   owner: hcops:hcops
+   path: /opt/vault/config/${hostname}.key
+   permissions: '0644'
  - path: /etc/environment
    permissions: 0644
    content: |
