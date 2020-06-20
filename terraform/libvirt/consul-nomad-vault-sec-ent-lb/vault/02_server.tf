@@ -50,6 +50,7 @@ resource "tls_cert_request" "vault_server" {
 
   dns_names = [
     "${var.datacenter}-server-vault-${count.index}",
+    "${var.datacenter}-server-vault-${count.index}.msk.local",
     "server.${var.datacenter}.vault",
     "server.global.vault",
     "server.europe.vault",

@@ -11,7 +11,7 @@ resource "libvirt_pool" "consul" {
 
 locals {
   consul_cluster_servers_expanded = {
-    for i in range(0, var.cluster_size):i => format("%s%s%d", var.datacenter, "-server-consul-", i)
+    for i in range(0, var.cluster_size):i => format("%s%s%d%s", var.datacenter, "-server-consul-", i, ".msk.local")
   }
 }
 

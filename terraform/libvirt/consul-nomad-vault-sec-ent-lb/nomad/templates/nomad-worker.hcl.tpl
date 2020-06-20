@@ -25,7 +25,7 @@ tls {
 
 vault {
   enabled = true
-  address = "https://dc1-server-vault.msk.local:8200"
+  address = "https://dc1-server-vault-0.msk.local:8200"
   ca_file = "/opt/vault/config/vault-ca.pem"
   cert_file = "/opt/vault/config/${node_name}.crt"
   key_file  = "/opt/vault/config/${node_name}.key"
