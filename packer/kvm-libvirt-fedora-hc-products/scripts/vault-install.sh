@@ -25,8 +25,9 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+EnvironmentFile=/etc/environment
 ExecReload=/bin/kill --signal HUP \$MAINPID
-ExecStart=/usr/local/bin/vault server -config /opt/vault/config/config.hcl
+ExecStart=/usr/local/bin/vault \${VAULT_MODE} -config /opt/vault/config/config.hcl
 KillMode=process
 AmbientCapabilities=CAP_IPC_LOCK
 Capabilities=CAP_IPC_LOCK+ep
@@ -37,7 +38,6 @@ LimitNPROC=infinity
 Restart=on-failure
 RestartSec=2
 StartLimitBurst=3
-StartLimitIntervalSec=10
 TasksMax=infinity
 User=hcops
 Group=hcops

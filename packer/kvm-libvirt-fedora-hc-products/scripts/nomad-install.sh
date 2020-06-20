@@ -42,7 +42,6 @@ LimitNPROC=infinity
 Restart=on-failure
 RestartSec=2
 StartLimitBurst=3
-StartLimitIntervalSec=10
 TasksMax=infinity
 
 [Install]

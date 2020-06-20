@@ -43,6 +43,8 @@ rsync
 qemu-guest-agent
 fuse-sshfs
 docker
+bind-utils
+dnsmasq
 -dracut-config-rescue
 -biosdevname
 -iprutils
