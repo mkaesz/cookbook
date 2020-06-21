@@ -74,7 +74,7 @@ EOT
 
 provisioner "remote-exec" {
 inline = [
-  "mkdir -p ~/demo/{lb,vault-consul-nomad}"
+  "mkdir -p ~/demo/{lb,nomad-bootstrap,vault-consul-nomad}"
 ]
 }
 
@@ -104,8 +104,8 @@ provisioner "file" {
 }
    
 provisioner "file" {
-   source = "${path.module}/demo/vault-consul-nomad/db.nomad"
-   destination = "/home/mkaesz/demo/vault-consul-nomad/db.nomad"
+   source = "${path.module}/demo/vault-consul-nomad/postgres-nomad-demo.nomad"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/postgres-nomad-demo.nomad"
 }
    
 provisioner "file" {

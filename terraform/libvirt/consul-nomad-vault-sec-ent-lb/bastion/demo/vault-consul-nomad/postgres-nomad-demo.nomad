@@ -8,6 +8,7 @@ job "postgres-nomad-demo" {
 
       config {
         image = "hashicorp/postgres-nomad-demo:latest"
+	network_mode = "host"
         port_map {
           db = 5432
         }

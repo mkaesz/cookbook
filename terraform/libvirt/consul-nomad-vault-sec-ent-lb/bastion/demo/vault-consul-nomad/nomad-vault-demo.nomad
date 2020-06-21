@@ -11,6 +11,7 @@ job "nomad-vault-demo" {
       driver = "docker"
       config {
         image = "hashicorp/nomad-vault-demo:latest"
+	network_mode = "host"
         port_map {
           http = 8080
         }
@@ -27,7 +28,6 @@ job "nomad-vault-demo" {
     "host": "database.service.consul",
     "port": 5432,
     "username": "{{ .Data.username }}",
-    {{ /* Ensure password is a properly escaped JSON string. */ }}
     "password": {{ .Data.password | toJSON }},
     "db": "postgres"
   }

@@ -143,7 +143,7 @@ data "template_file" "nomad_server_config" {
     node_name                = "${var.datacenter}-server-nomad-${count.index}.${var.domain}"
     datacenter               = var.datacenter
     gossip_password          = base64encode(random_string.nomad_gossip_password.result)
-    vault_nomad_server_token = "f02f01c2-c0d1-7cb7-6b88-8a14fada58c0"
+    vault_nomad_server_token = "3pa0NBHkh1e4tAlKQVMamsOz"
     domain                   = var.domain
   }
   count = var.cluster_size

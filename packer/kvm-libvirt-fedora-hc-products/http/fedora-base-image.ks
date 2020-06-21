@@ -111,30 +111,6 @@ cat > /etc/hosts << EOF
 EOF
 echo .
 
-cat > /etc/dnsmasq.d/consul-dns.conf << EOF
-server=/consul/127.0.0.1#8600
-server=192.168.0.171
-
-listen-address=127.0.0.1
-
-no-resolv
-no-poll
-EOF
-
-cat > /etc/NetworkManager/NetworkManager.conf << EOF
-[main]
-plugins = ifcfg-rh,
-dns=none
-EOF
-
-# Anaconda is writing an /etc/resolv.conf from the install environment.
-# The system should start out with an empty file.
-truncate -s 0 /etc/resolv.conf
-
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
-
 echo "Disabling tmpfs for /tmp."
 systemctl mask tmp.mount
  
@@ -189,6 +165,30 @@ bash /tmp/nomad-install.sh
 
 wget https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info
 sudo tic -xe alacritty,alacritty-direct alacritty.info
+
+cat > /etc/dnsmasq.d/consul-dns.conf << EOF
+server=/consul/127.0.0.1#8600
+server=192.168.0.171
+
+listen-address=127.0.0.1
+
+no-resolv
+no-poll
+EOF
+
+cat > /etc/NetworkManager/NetworkManager.conf << EOF
+[main]
+plugins = ifcfg-rh,
+dns=none
+EOF
+
+# Anaconda is writing an /etc/resolv.conf from the install environment.
+# The system should start out with an empty file.
+truncate -s 0 /etc/resolv.conf
+
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
 
 echo "Cleaning history"
 history -c
