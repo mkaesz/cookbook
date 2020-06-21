@@ -1,5 +1,5 @@
 job "haproxy" {
-  region      = "global"
+  region      = "europe"
   datacenters = ["dc1"]
   type        = "service"
 

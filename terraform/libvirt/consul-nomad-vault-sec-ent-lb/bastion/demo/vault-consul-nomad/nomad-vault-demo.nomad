@@ -11,7 +11,7 @@ job "nomad-vault-demo" {
       driver = "docker"
       config {
         image = "hashicorp/nomad-vault-demo:latest"
-	network_mode = "host"
+	network_mode = "nomad"
         port_map {
           http = 8080
         }
