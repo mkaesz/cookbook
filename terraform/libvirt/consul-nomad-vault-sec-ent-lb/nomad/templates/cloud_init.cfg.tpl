@@ -83,5 +83,4 @@ runcmd:
   - [ systemctl, enable, docker ]
   - [ systemctl, enable, consul ]
   - [ systemctl, enable, nomad ]
-bootcmd:
   - docker network create nomad
