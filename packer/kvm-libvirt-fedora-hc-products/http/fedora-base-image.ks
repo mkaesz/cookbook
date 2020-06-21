@@ -42,6 +42,7 @@ dnf-yum
 rsync
 qemu-guest-agent
 fuse-sshfs
+libvarlink-util
 podman
 bind-utils
 dnsmasq
@@ -153,6 +154,31 @@ rm -f /etc/machine-id
 touch /etc/machine-id
 
 useradd hcops
+groupadd podman
+usermod -a hcops -G podman
+
+mkdir -p /etc/tmpfiles.d/
+
+cat > /etc/tmpfiles.d/podman.conf << EOF
+d /run/podman 0750 root podman
+EOF
+
+cat > /etc/systemd/system/podman.socket << EOF 
+[Unit]
+Description=Podman API Socket
+Documentation=man:podman-api(1)
+
+[Socket]
+ListenStream=/run/podman/podman.sock
+SocketMode=0660
+SocketGroup=podman
+
+[Install]
+WantedBy=sockets.target
+EOF
+
+systemd-tmpfiles --create
+systemctl enable --now podman.socket
 
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/consul-install.sh -o /tmp/consul-install.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/vault-install.sh -o /tmp/vault-install.sh
