@@ -42,7 +42,7 @@ dnf-yum
 rsync
 qemu-guest-agent
 fuse-sshfs
-docker
+podman
 bind-utils
 dnsmasq
 -dracut-config-rescue
@@ -153,7 +153,6 @@ rm -f /etc/machine-id
 touch /etc/machine-id
 
 useradd hcops
-usermod -G docker -a hcops
 
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/consul-install.sh -o /tmp/consul-install.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/vault-install.sh -o /tmp/vault-install.sh

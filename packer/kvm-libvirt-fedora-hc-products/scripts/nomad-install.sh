@@ -47,3 +47,9 @@ TasksMax=infinity
 [Install]
 WantedBy=multi-user.target
 EOF
+
+wget https://github.com/hashicorp/nomad-driver-podman/releases/download/v0.0.3/nomad-driver-podman_linux_amd64.tar.gz -O nomad-driver-podman.tar.gz
+tar -xf nomad-driver-podman.tar.gz
+chmod +x nomad-driver-podman/nomad-driver-podman
+mv nomad-driver-podman/nomad-driver-podman /opt/nomad/data/plugins/
+
