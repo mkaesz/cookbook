@@ -23,8 +23,6 @@ nomad version
 
 sudo mkdir -p /opt/nomad/{config,data,data/plugins}
 
-sudo chown -R hcops:hcops /opt/nomad
-
 cat <<-EOF | sudo tee /etc/systemd/system/nomad.service
 [Unit]
 Description=Nomad
@@ -48,8 +46,4 @@ TasksMax=infinity
 WantedBy=multi-user.target
 EOF
 
-wget https://github.com/hashicorp/nomad-driver-podman/releases/download/v0.0.3/nomad-driver-podman_linux_amd64.tar.gz -O nomad-driver-podman.tar.gz
-tar -xf nomad-driver-podman.tar.gz
-chmod +x nomad-driver-podman/nomad-driver-podman
-mv nomad-driver-podman/nomad-driver-podman /opt/nomad/data/plugins/
-
+sudo chown -R hcops:hcops /opt/nomad

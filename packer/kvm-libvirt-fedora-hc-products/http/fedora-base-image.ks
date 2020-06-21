@@ -42,8 +42,7 @@ dnf-yum
 rsync
 qemu-guest-agent
 fuse-sshfs
-libvarlink-util
-podman
+docker
 bind-utils
 dnsmasq
 -dracut-config-rescue
@@ -112,6 +111,30 @@ cat > /etc/hosts << EOF
 EOF
 echo .
 
+cat > /etc/dnsmasq.d/consul-dns.conf << EOF
+server=/consul/127.0.0.1#8600
+server=192.168.0.171
+
+listen-address=127.0.0.1
+
+no-resolv
+no-poll
+EOF
+
+cat > /etc/NetworkManager/NetworkManager.conf << EOF
+[main]
+plugins = ifcfg-rh,
+dns=none
+EOF
+
+# Anaconda is writing an /etc/resolv.conf from the install environment.
+# The system should start out with an empty file.
+truncate -s 0 /etc/resolv.conf
+
+cat > /etc/resolv.conf << EOF
+nameserver 127.0.0.1
+EOF
+
 echo "Disabling tmpfs for /tmp."
 systemctl mask tmp.mount
  
@@ -154,31 +177,7 @@ rm -f /etc/machine-id
 touch /etc/machine-id
 
 useradd hcops
-groupadd podman
-usermod -a hcops -G podman
-
-mkdir -p /etc/tmpfiles.d/
-
-cat > /etc/tmpfiles.d/podman.conf << EOF
-d /run/podman 0750 root podman
-EOF
-
-cat > /etc/systemd/system/podman.socket << EOF 
-[Unit]
-Description=Podman API Socket
-Documentation=man:podman-api(1)
-
-[Socket]
-ListenStream=/run/podman/podman.sock
-SocketMode=0660
-SocketGroup=podman
-
-[Install]
-WantedBy=sockets.target
-EOF
-
-systemd-tmpfiles --create
-systemctl enable --now podman.socket
+usermod -G docker -a hcops
 
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/consul-install.sh -o /tmp/consul-install.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/kvm-libvirt-fedora-hc-products/scripts/vault-install.sh -o /tmp/vault-install.sh
@@ -190,31 +189,6 @@ bash /tmp/nomad-install.sh
 
 wget https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info
 sudo tic -xe alacritty,alacritty-direct alacritty.info
-
-mkdir -p /etc/dnsmasq.d/
-cat > /etc/dnsmasq.d/consul-dns.conf << EOF
-server=/consul/127.0.0.1#8600
-server=192.168.0.171
-
-listen-address=127.0.0.1
-
-no-resolv
-no-poll
-EOF
-
-cat > /etc/NetworkManager/NetworkManager.conf << EOF
-[main]
-plugins = ifcfg-rh,
-dns=none
-EOF
-
-# Anaconda is writing an /etc/resolv.conf from the install environment.
-# The system should start out with an empty file.
-truncate -s 0 /etc/resolv.conf
-
-cat > /etc/resolv.conf << EOF
-nameserver 127.0.0.1
-EOF
 
 echo "Cleaning history"
 history -c
