@@ -51,6 +51,8 @@ resource "tls_cert_request" "vault_server" {
   dns_names = [
     "${var.datacenter}-server-vault-${count.index}",
     "${var.datacenter}-server-vault-${count.index}.${var.domain}",
+    "active.${var.datacenter}-vault-cluster.service.consul",
+    "active.${var.datacenter}-vault.service.consul",
     "server.${var.datacenter}.vault",
     "server.global.vault",
     "server.europe.vault",

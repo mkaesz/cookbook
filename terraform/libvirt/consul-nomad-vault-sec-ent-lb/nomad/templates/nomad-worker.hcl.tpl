@@ -9,6 +9,7 @@ region               = "europe"
 
 client {
   enabled = true
+  bridge_network_name = "nomad"
 }
 
 tls {
@@ -25,17 +26,13 @@ tls {
 
 vault {
   enabled   = true
-  address   = "https://active.${var.datacenter}-vault-cluster.service.consul:8200"
+  address   = "https://active.${datacenter}-vault-cluster.service.consul:8200"
   ca_file   = "/opt/vault/config/vault-ca.pem"
   cert_file = "/opt/vault/config/${node_name}.crt"
   key_file  = "/opt/vault/config/${node_name}.key"
 }
 
 acl {
-  enabled = true
-}
-
-plugin "docker" {
   enabled = true
 }
 
