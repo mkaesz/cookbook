@@ -2,6 +2,7 @@ job "nomad-vault-demo" {
   datacenters = ["dc1"]
 
   group "demo" {
+    count = 2
     task "server" {
 
       vault {
@@ -11,7 +12,7 @@ job "nomad-vault-demo" {
       driver = "docker"
       config {
         image = "hashicorp/nomad-vault-demo:latest"
-	network_mode = "nomad"
+        network_mode = "nomad"
         port_map {
           http = 8080
         }
@@ -38,6 +39,7 @@ EOF
 
       resources {
         network {
+	  mode = "host"
           port "http" {}
         }
       }
@@ -45,6 +47,7 @@ EOF
       service {
         name = "nomad-vault-demo"
         port = "http"
+        address_mode = "host"
 
         tags = [
           "urlprefix-/",

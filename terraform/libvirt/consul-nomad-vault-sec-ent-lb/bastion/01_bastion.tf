@@ -124,6 +124,11 @@ provisioner "file" {
 }
   
 provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/haproxy.nomad"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/haproxy.nomad"
+}
+  
+provisioner "file" {
    source = "${path.module}/demo/lb/demo-webapp.nomad"
    destination = "/home/mkaesz/demo/lb/demo-webapp.nomad"
 }
@@ -136,6 +141,16 @@ provisioner "file" {
 provisioner "file" {
    source = "${path.module}/scripts/vault-bootstrap.sh"
    destination = "/home/mkaesz/vault-bootstrap.sh"
+}
+
+provisioner "file" {
+   source = "${path.module}/scripts/vault-login.sh"
+   destination = "/home/mkaesz/vault-login.sh"
+}
+
+provisioner "file" {
+   source = "${path.module}/scripts/vault-unseal.sh"
+   destination = "/home/mkaesz/vault-unseal.sh"
 }
 
    connection {
