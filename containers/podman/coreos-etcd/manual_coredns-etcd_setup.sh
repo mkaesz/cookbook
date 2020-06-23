@@ -60,4 +60,4 @@ podman exec -ti --env=ETCDCTL_API=3  etcd /usr/local/bin/etcdctl \
 
 ### Check resolution
 dig +short arch.msk.local @$coredns_ip
-dig +short -x ${HostIP} @$coredns_ip
+dig +short -x ${HostIP} @$coredns_ip 
