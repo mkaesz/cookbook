@@ -129,6 +129,11 @@ provisioner "file" {
 }
   
 provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/deploy.sh"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/deploy.sh"
+}
+
+provisioner "file" {
    source = "${path.module}/demo/lb/demo-webapp.nomad"
    destination = "/home/mkaesz/demo/lb/demo-webapp.nomad"
 }
@@ -156,7 +161,8 @@ provisioner "file" {
    connection {
       type = "ssh"
       user = "mkaesz"
-      host = "dc1-bastion.${var.domain}"
+      #host = "dc1-bastion.${var.domain}"
+      host = "dc1-bastion.msk.local"
       private_key = file("~/.ssh/id_rsa")
    }
 }
