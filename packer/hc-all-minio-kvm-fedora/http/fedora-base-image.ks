@@ -159,11 +159,13 @@ curl http://192.168.0.171:8088/workspace/cookbook/packer/hc-all-minio-kvm-fedora
 curl http://192.168.0.171:8088/workspace/cookbook/packer/hc-all-minio-kvm-fedora/scripts/vault-install.sh -o /tmp/vault-install.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/hc-all-minio-kvm-fedora/scripts/nomad-install.sh -o /tmp/nomad-install.sh
 curl http://192.168.0.171:8088/workspace/cookbook/packer/hc-all-minio-kvm-fedora/scripts/minio-install.sh -o /tmp/minio-install.sh
+curl http://192.168.0.171:8088/workspace/cookbook/packer/hc-all-minio-kvm-fedora/scripts/tfe-install.sh -o /tmp/tfe-install.sh
 
 bash /tmp/vault-install.sh
 bash /tmp/consul-install.sh
 bash /tmp/nomad-install.sh
 bash /tmp/minio-install.sh
+bash /tmp/tfe-install.sh
 
 wget https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info
 sudo tic -xe alacritty,alacritty-direct alacritty.info
