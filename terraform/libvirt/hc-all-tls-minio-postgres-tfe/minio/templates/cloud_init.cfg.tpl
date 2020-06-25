@@ -15,34 +15,29 @@ power_state:
   condition: True
 write_files:
  - encoding: b64
-   content: ${tfe_settings}
+   content: ${minio_ca_file}
    owner: hcops:hcops
-   path: /opt/tfe/config/tfe-settings.json
+   path: /opt/minio/config/minio-ca.pem
    permissions: '0644'
  - encoding: b64
-   content: ${replicated_conf}
+   content: ${minio_cert_file}
    owner: hcops:hcops
-   path: /etc/replicated.conf
+   path: /opt/minio/config/public.crt
    permissions: '0644'
  - encoding: b64
-   content: ${tfe_admin_user_config}
+   content: ${minio_key_file}
    owner: hcops:hcops
-   path: /opt/tfe/config/tfe-admin-user.json
+   path: /opt/minio/config/private.key
    permissions: '0644'
  - encoding: b64
-   content: ${tfe_cert_file}
+   content: ${minio_config}
    owner: hcops:hcops
-   path: /opt/tfe/config/${hostname}.crt
+   path: /opt/minio/config/minio-server.config
    permissions: '0644'
- - encoding: b64
-   content: ${tfe_key_file}
-   owner: hcops:hcops
-   path: /opt/tfe/config/${hostname}.key
-   permissions: '0644'
- - encoding: b64
-   content: ${tfe_lic_file}
-   owner: hcops:hcops
-   path: /opt/tfe/config/tfe-license.rli
-   permissions: '0644'
+ - path: /etc/environment
+   permissions: 0644
+   content: |
+     MINIO_REGION_NAME="europe"
+     MINIO_DOMAIN=${domain}
 runcmd:
-  - [systecmtl, enable, docker]
+ - [ systemctl, enable, minio ]
