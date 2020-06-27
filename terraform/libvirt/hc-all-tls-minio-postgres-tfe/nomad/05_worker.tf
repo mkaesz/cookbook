@@ -187,6 +187,7 @@ resource "libvirt_domain" "nomad_worker" {
   memory = "4096"
   vcpu   = 3
   count = var.workers
+  qemu_agent = true
 
   cloudinit = libvirt_cloudinit_disk.commoninit_nomad_worker[count.index].id
 
@@ -195,8 +196,12 @@ resource "libvirt_domain" "nomad_worker" {
   }
 
   network_interface {
-    network_name   = "default"
+    network_name   = "br0"
     wait_for_lease = true 
+  }
+  
+  xml {
+    xslt = file("qemuagent.xsl")
   }
 
   provisioner "local-exec" {

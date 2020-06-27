@@ -144,14 +144,19 @@ resource "libvirt_domain" "vault_server" {
   name       = "${var.datacenter}-server-vault-${count.index}"
   count      = var.cluster_size
   cloudinit  = libvirt_cloudinit_disk.commoninit_vault_server[count.index].id
+  qemu_agent = true
 
   disk {
     volume_id = element(libvirt_volume.volume_server.*.id, count.index)
   }
 
   network_interface {
-    network_name   = "default"
+    network_name   = "br0"
     wait_for_lease = true
+  }
+
+  xml {
+    xslt = file("qemuagent.xsl")
   }
 
   provisioner "local-exec" {

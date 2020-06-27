@@ -89,4 +89,97 @@ sudo podman exec -ti --env=ETCDCTL_API=3 etcd /usr/local/bin/etcdctl del /skydns
 EOT  
 }  
 
+provisioner "remote-exec" {
+inline = [
+  "mkdir -p ~/demo/{lb,nomad-bootstrap,vault-consul-nomad}"
+]
+}
+
+provisioner "file" {
+   source = "${path.module}/scripts/nomad-bootstrap.sh"
+   destination = "/home/mkaesz/nomad-bootstrap.sh"
+}
+
+provisioner "file" {
+   source = "~/workspace/vault-license.hclic"
+   destination = "/home/mkaesz/vault-license.hclic"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/accessdb.sql"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/accessdb.sql"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/access-tables-policy.hcl"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/access-tables-policy.hcl"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/connection.json"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/connection.json"
+}
+   
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/postgres-nomad-demo.nomad"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/postgres-nomad-demo.nomad"
+}
+   
+provisioner "file" {
+   source = "${path.module}/demo/nomad-bootstrap/nomad-cluster-role.json"
+   destination = "/home/mkaesz/demo/nomad-bootstrap/nomad-cluster-role.json"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/nomad-bootstrap/nomad-server-policy.hcl"
+   destination = "/home/mkaesz/demo/nomad-bootstrap/nomad-server-policy.hcl"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/nomad-vault-demo.nomad"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/nomad-vault-demo.nomad"
+}
+  
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/haproxy.nomad"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/haproxy.nomad"
+}
+  
+provisioner "file" {
+   source = "${path.module}/demo/vault-consul-nomad/deploy.sh"
+   destination = "/home/mkaesz/demo/vault-consul-nomad/deploy.sh"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/lb/demo-webapp.nomad"
+   destination = "/home/mkaesz/demo/lb/demo-webapp.nomad"
+}
+
+provisioner "file" {
+   source = "${path.module}/demo/lb/haproxy.nomad"
+   destination = "/home/mkaesz/demo/lb/haproxy.nomad"
+}
+   
+provisioner "file" {
+   source = "${path.module}/scripts/vault-bootstrap.sh"
+   destination = "/home/mkaesz/vault-bootstrap.sh"
+}
+
+provisioner "file" {
+   source = "${path.module}/scripts/vault-login.sh"
+   destination = "/home/mkaesz/vault-login.sh"
+}
+
+provisioner "file" {
+   source = "${path.module}/scripts/vault-unseal.sh"
+   destination = "/home/mkaesz/vault-unseal.sh"
+}
+
+   connection {
+      type = "ssh"
+      user = "mkaesz"
+      #host = "dc1-bastion.${var.domain}"
+      host = "dc1-bastion.msk.local"
+      private_key = file("~/.ssh/id_rsa")
+   }
 }

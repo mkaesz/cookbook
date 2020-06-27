@@ -137,6 +137,7 @@ resource "libvirt_cloudinit_disk" "commoninit_consul_server" {
 resource "libvirt_domain" "consul_server" {
   name = "${var.datacenter}-server-consul-${count.index}"
   count = var.cluster_size
+  qemu_agent = true
 
   cloudinit = libvirt_cloudinit_disk.commoninit_consul_server[count.index].id
 
@@ -145,8 +146,12 @@ resource "libvirt_domain" "consul_server" {
   }
 
   network_interface {
-    network_name   = "default"
+    network_name   = "br0"
     wait_for_lease = true 
+  }
+
+  xml {
+    xslt = file("qemuagent.xsl")
   }
 
   provisioner "local-exec" {

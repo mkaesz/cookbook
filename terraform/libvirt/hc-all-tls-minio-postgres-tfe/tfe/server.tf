@@ -36,14 +36,19 @@ resource "libvirt_cloudinit_disk" "commoninit" {
 resource "libvirt_domain" "tfe" {
   name      = "${var.datacenter}-tfe"
   cloudinit = libvirt_cloudinit_disk.commoninit.id
+  qemu_agent = true
 
   disk {
     volume_id = libvirt_volume.volume.id
   }
 
   network_interface {
-    network_name   = "default"
+    network_name   = "br0"
     wait_for_lease = true 
+  }
+
+  xml {
+    xslt = file("qemuagent.xsl")
   }
 
   provisioner "local-exec" {

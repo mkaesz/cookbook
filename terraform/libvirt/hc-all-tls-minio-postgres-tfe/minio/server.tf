@@ -84,14 +84,19 @@ resource "libvirt_cloudinit_disk" "commoninit_minio_server" {
 resource "libvirt_domain" "minio_server" {
   name       = "${var.datacenter}-server-minio"
   cloudinit  = libvirt_cloudinit_disk.commoninit_minio_server.id
+  qemu_agent = true
 
   disk {
     volume_id = libvirt_volume.volume_server.id
   }
 
   network_interface {
-    network_name   = "default"
+    network_name   = "br0"
     wait_for_lease = true 
+  }
+
+  xml {
+    xslt = file("qemuagent.xsl")
   }
 
   provisioner "local-exec" {
